@@ -1,0 +1,556 @@
+/* Copyright (c) 2017 FIRST. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided that
+ * the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list
+ * of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of FIRST nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+ * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.firstinspires.ftc.teamcode;
+
+import androidx.appcompat.app.AppCompatDelegate;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.teamcode.constants.TeleOpServoConstants;
+
+import java.lang.Math;
+
+import java.util.TimerTask;
+import java.util.Timer;
+/*
+ * This file contains an example of an iterative (Non-Linear) "OpMode".
+ * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
+ * The names of OpModes appear on the menu of the FTC Driver Station.
+ * When a selection is made from the menu, the corresponding OpMode
+ * class is instantiated on the Robot Controller and executed.
+ *
+ * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
+ * It includes all the skeletal structure that all iterative OpModes contain.
+ *
+ * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
+ * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
+ */
+
+@TeleOp(name="TestingWithLogieBear2", group="Iterative OpMode")
+
+public class TestingWithLogieBear2 extends OpMode {
+    // Declare OpMode members.
+    private ElapsedTime runtime = new ElapsedTime();
+    private DcMotor elMotor = null;
+    private DcMotor exMotor = null;
+    private DcMotor FLMotor = null;
+    private DcMotor FRMotor = null;
+    private DcMotor BLMotor = null;
+    private DcMotor BRMotor = null;
+    private DcMotor LAMotor = null;
+    private DcMotor RAMotor = null;
+    private Servo Claw = null;
+    private Servo Wrist = null;
+
+    private boolean dPadUpPressed;
+    private boolean dPadDownPressed;
+    private boolean dPadLeftPressed;
+    private boolean dPadRightPressed;
+    private boolean leftBumperPressed;
+    private boolean rightBumperPressed;
+    private boolean xButtonPressed;
+    private boolean aButtonPressed;
+    private boolean bButtonPressed;
+    private boolean yButtonPressed;
+    private double lTriggerPressed;
+    private double rTriggerPressed;
+
+    private boolean isArmMoving = false;
+    private boolean isTargetAndCurrentElPositionTheSame = false;
+    private boolean isTargetAndCurrentExPositionTheSame = false;
+    private boolean isTargetAndCurrentLAPositionTheSame = false;
+    private boolean isTargetAndCurrentRAPositionTheSame = false;
+
+    private double elbowPower = 0.5;
+    private double[] ClawPositions = TeleOpServoConstants.ClawPositions;
+    private double[] WristPositions = TeleOpServoConstants.WristPositions;
+    private int[] ExtensionPositions = TeleOpServoConstants.ExtensionPositions;
+    private int[] ElbowPositions = TeleOpServoConstants.ElbowPositions;
+    private int[]LAPositions = TeleOpServoConstants.LAPositions;
+    private int[]RAPositions = TeleOpServoConstants.RAPositions;
+
+
+
+    private int index = 0;
+    private int wristIndex = 0;
+
+    private boolean oldDPadUpPressed = false;
+    private boolean oldDPadLeftPressed = false;
+    private boolean oldDPadDownPressed = false;
+    private boolean oldDPadRightPressed = false;
+    private boolean oldLeftBumperPressed = false;
+    private boolean oldRightBumperPressed = false;
+    private boolean oldxButtonPressed = false;
+    private boolean oldaButtonPressed = false;
+    private boolean oldbButtonPressed = false;
+    private boolean oldyButtonPressed = false;
+    private final int DELAY_BETWEEN_MOVES = 100;
+    Timer timer;
+
+    class setIsArmMoving extends TimerTask {
+        boolean val;
+
+        public setIsArmMoving(boolean v) {
+            this.val = v;
+        }
+
+        public void run() {
+            isArmMoving = val;
+        }
+
+    }
+
+    class ElbowPosition extends TimerTask {
+        int i;
+        double power;
+
+        public ElbowPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            elMotor.setTargetPosition(ElbowPositions[i]);
+            elMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            elMotor.setPower(power);
+        }
+    }
+
+
+    class ExtensionPosition extends TimerTask {
+        int i;
+        double power;
+
+        public ExtensionPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            exMotor.setTargetPosition(ExtensionPositions[i]);
+            exMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            exMotor.setPower(power);
+        }
+    }
+    class LAPosition extends TimerTask {
+        int i;
+        double power;
+
+        public LAPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            LAMotor.setTargetPosition(LAPositions[i]);
+            LAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LAMotor.setPower(power);
+        }
+    }
+
+    class RAPosition extends TimerTask {
+        int i;
+        double power;
+
+        public RAPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            RAMotor.setTargetPosition(RAPositions[i]);
+            RAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            RAMotor.setPower(power);
+        }
+    }
+
+
+    class WristPosition extends TimerTask {
+        int i;
+
+        public WristPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            Wrist.setPosition(WristPositions[i]);
+        }
+    }
+
+    /*
+     * Code to run ONCE when the driver hits INIT
+     */
+    @Override
+    public void init() {
+        telemetry.addData("Status", "Initialized");
+
+        // Initialize the hardware variables. Note that the strings used here as parameters
+        // to 'get' must correspond to the names assigned during the robot configuration
+        // step (using the FTC Robot Controller app on the phone).
+        elMotor = hardwareMap.get(DcMotor.class, "elbowMotor");
+        exMotor = hardwareMap.get(DcMotor.class, "extensionMotor");
+        FLMotor = hardwareMap.get(DcMotor.class, "FL");
+        FRMotor = hardwareMap.get(DcMotor.class, "FR");
+        BLMotor = hardwareMap.get(DcMotor.class, "BL");
+        BRMotor = hardwareMap.get(DcMotor.class, "BR");
+        LAMotor = hardwareMap.get(DcMotor.class, "LA");
+        RAMotor = hardwareMap.get(DcMotor.class, "RA");
+        Claw = hardwareMap.get(Servo.class, "Claw");
+        Wrist = hardwareMap.get(Servo.class, "Wrist");
+        timer = new Timer();
+
+        elMotor.setTargetPosition(ElbowPositions[0]);
+        exMotor.setTargetPosition(ExtensionPositions[0]);
+        LAMotor.setTargetPosition(LAPositions[0]);
+        RAMotor.setTargetPosition(RAPositions[0]);
+
+
+        elMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        exMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        exMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        LAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        RAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+
+
+
+        FLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        elMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        exMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
+        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+        elMotor.setDirection(DcMotor.Direction.FORWARD);
+        exMotor.setDirection(DcMotor.Direction.FORWARD);
+        FLMotor.setDirection(DcMotor.Direction.REVERSE);
+        FRMotor.setDirection(DcMotor.Direction.FORWARD);
+        BLMotor.setDirection(DcMotor.Direction.REVERSE);
+        BRMotor.setDirection(DcMotor.Direction.FORWARD);
+        RAMotor.setDirection(DcMotor.Direction.FORWARD);
+        LAMotor.setDirection(DcMotor.Direction.FORWARD);
+
+
+        // Tell the driver that initialization is complete.
+        telemetry.addData("Status", "Initialized");
+
+        //Wrist Postition
+        Wrist.setPosition(WristPositions[1]);
+    }
+
+    /*
+     * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
+     */
+    @Override
+    public void init_loop() {
+
+    }
+
+    /*
+     * Code to run ONCE when the driver hits PLAY
+     */
+    @Override
+    public void start() {
+        runtime.reset();
+    }
+
+    /*
+     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+     */
+    @Override
+    public void loop() {
+// - This uses basic math to combine motions and is easier to drive straight.
+        double r = Math.hypot(gamepad1.left_stick_x, -gamepad1.left_stick_y);
+        double robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+        double rightX = gamepad1.right_stick_x;
+        final double FLPower = r * Math.cos(robotAngle) + rightX;
+        final double FRPower = r * Math.sin(robotAngle) - rightX;
+        final double BLPower = r * Math.sin(robotAngle) + rightX;
+        final double BRPower = r * Math.cos(robotAngle) - rightX;
+
+        // Send calculated power to wheels
+        if (gamepad1.right_bumper || gamepad1.left_bumper) {
+            if (-gamepad1.right_stick_y > 0) {
+                if (gamepad1.right_bumper) {
+                    FLMotor.setPower(1);
+                    FRMotor.setPower(-1 + Math.abs(gamepad1.right_stick_y));
+                    BLMotor.setPower(-1 + Math.abs(gamepad1.right_stick_y));
+                    BRMotor.setPower(1);
+                } else {
+                    FLMotor.setPower(-1 + Math.abs(gamepad1.right_stick_y));
+                    FRMotor.setPower(1);
+                    BLMotor.setPower(1);
+                    BRMotor.setPower(-1 + Math.abs(gamepad1.right_stick_y));
+                }
+            } else {
+                if (gamepad1.right_bumper) {
+                    FLMotor.setPower(1 - Math.abs(gamepad1.right_stick_y));
+                    FRMotor.setPower(-1);
+                    BLMotor.setPower(-1);
+                    BRMotor.setPower(1 - Math.abs(gamepad1.right_stick_y));
+                } else {
+                    FLMotor.setPower(-1);
+                    FRMotor.setPower(1 - Math.abs(gamepad1.right_stick_y));
+                    BLMotor.setPower(1 - Math.abs(gamepad1.right_stick_y));
+                    BRMotor.setPower(-1);
+                }
+            }
+            //   }
+        } else {
+            FLMotor.setPower(FLPower);
+            FRMotor.setPower(FRPower);
+            BLMotor.setPower(BLPower);
+            BRMotor.setPower(BRPower);
+        }
+
+        //More Buttons
+        dPadUpPressed = gamepad2.dpad_up;
+        dPadLeftPressed = gamepad2.dpad_left;
+        dPadDownPressed = gamepad2.dpad_down;
+        dPadRightPressed = gamepad2.dpad_right;
+        leftBumperPressed = gamepad2.left_bumper;
+        rightBumperPressed = gamepad2.right_bumper;
+        xButtonPressed = gamepad2.x;
+        aButtonPressed = gamepad2.a;
+        bButtonPressed = gamepad2.b;
+        yButtonPressed = gamepad2.y;
+        lTriggerPressed = gamepad2.left_trigger;
+        rTriggerPressed = gamepad2.right_trigger;
+
+        //Elbow Power
+        /*if (dPadUpPressed && !oldDPadUpPressed) {
+            elbowPower = elbowPower + 0.1;
+        }
+        if (dPadDownPressed && !oldDPadDownPressed) {
+            elbowPower = elbowPower - 0.1;
+        }
+
+
+        //Elbow Control
+        if (gamepad2.left_stick_y != 0) {
+            elMotor.setPower(gamepad2.left_stick_y * elbowPower);
+        } else {
+            elMotor.setPower(0);
+        }
+
+        //Slide Control
+        if (gamepad2.right_stick_y != 0) {
+            exMotor.setPower(gamepad2.right_stick_y * 0.5);
+        } else {
+            exMotor.setPower(0);
+        }*/
+
+        //Wrist Control
+        /*if (leftBumperPressed && !oldLeftBumperPressed) {
+            Wrist.setPosition(WristPositions[2]);
+        } else if (rightBumperPressed && !oldRightBumperPressed) {
+            Wrist.setPosition(WristPositions[0]);
+        } else if (!leftBumperPressed && !rightBumperPressed){
+            Wrist.setPosition(WristPositions[1]);
+        }*/
+
+        //Claw Control
+        if (leftBumperPressed && !oldLeftBumperPressed) {
+            Claw.setPosition(ClawPositions[0]);
+        } else if (rightBumperPressed && !oldRightBumperPressed) {
+            Claw.setPosition(ClawPositions[1]);
+        }
+
+        if (elMotor.getCurrentPosition() == elMotor.getTargetPosition()) {
+            isTargetAndCurrentElPositionTheSame = true;
+        } else {
+            isTargetAndCurrentElPositionTheSame = false;
+        }
+
+        if (exMotor.getCurrentPosition() == exMotor.getTargetPosition()) {
+            isTargetAndCurrentExPositionTheSame = true;
+        } else {
+            isTargetAndCurrentExPositionTheSame = false;
+        }
+
+        if (LAMotor.getCurrentPosition() == LAMotor.getTargetPosition()) {
+            isTargetAndCurrentLAPositionTheSame = true;
+        } else {
+            isTargetAndCurrentLAPositionTheSame = false;
+        }
+
+        if (RAMotor.getCurrentPosition() == RAMotor.getTargetPosition()) {
+            isTargetAndCurrentRAPositionTheSame = true;
+        } else {
+            isTargetAndCurrentRAPositionTheSame = false;
+        }
+
+
+        //hang code
+
+        if (lTriggerPressed > .3){
+            timer.schedule(new LAPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new RAPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
+
+        } else if (rTriggerPressed > .3){
+            timer.schedule(new LAPosition(1, 1), 0 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new RAPosition(1, 1), 0 * DELAY_BETWEEN_MOVES);
+        }
+        else {
+            LAMotor.setPower(0);
+            RAMotor.setPower(0);
+        }
+
+        if (index != 0) {
+            if (aButtonPressed && !oldaButtonPressed && !isArmMoving) { //neutral position index = 0
+                new setIsArmMoving(true).run();
+                timer.schedule(new ExtensionPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ElbowPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(2), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 12 * DELAY_BETWEEN_MOVES);
+                index = 0;
+            }
+        } else if (index == 0) {
+            if (bButtonPressed && !oldbButtonPressed && !isArmMoving) { //intake index = 1
+                new setIsArmMoving(true).run();
+                timer.schedule(new ElbowPosition(1, 0.7), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ExtensionPosition(1, 0.7), 6 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(0), 6 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 10 * DELAY_BETWEEN_MOVES);
+                index = 1;
+
+            } else if (xButtonPressed && !oldxButtonPressed && !isArmMoving) { //low basket index = 2
+                new setIsArmMoving(true).run();
+                timer.schedule(new ElbowPosition(2, 0.4), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ExtensionPosition(2, 0.7), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(2), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 10 * DELAY_BETWEEN_MOVES);
+                index = 2;
+
+            }else if (yButtonPressed && !oldyButtonPressed && !isArmMoving) { //high basket index = 3
+                new setIsArmMoving(true).run();
+                timer.schedule(new ElbowPosition(3, 0.4), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ExtensionPosition(3, 1), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(2), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 12 * DELAY_BETWEEN_MOVES);
+                index = 3;
+
+            }else if (dPadUpPressed && !oldDPadUpPressed && !isArmMoving) { //high rung index = 3
+                new setIsArmMoving(true).run();
+                timer.schedule(new ElbowPosition(4, 0.4), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ExtensionPosition(0, 1), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(3), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 12 * DELAY_BETWEEN_MOVES);
+                index = 3;
+
+           }else if (dPadLeftPressed && !oldDPadLeftPressed && !isArmMoving) { //high rung down index = 3
+                new setIsArmMoving(true).run();
+                timer.schedule(new ElbowPosition(1, 0.4), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ExtensionPosition(0, 1), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(3), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 12 * DELAY_BETWEEN_MOVES);
+                index = 2;
+
+            }else if (dPadDownPressed && !oldDPadDownPressed && !isArmMoving) { //Low rung down index = 3
+                new setIsArmMoving(true).run();
+                timer.schedule(new ElbowPosition(0, 0.4), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ExtensionPosition(0, 1), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(0), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 12 * DELAY_BETWEEN_MOVES);
+                index = 3;
+
+            }else if (dPadRightPressed && !oldDPadRightPressed && !isArmMoving) { //Low rung down index = 3
+                new setIsArmMoving(true).run();
+                timer.schedule(new ElbowPosition(0, 0.4), 0 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new ExtensionPosition(0, 1), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new WristPosition(0), 8 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new setIsArmMoving(false), 12 * DELAY_BETWEEN_MOVES);
+                index = 3;
+
+            }
+        }
+
+        //Buttons
+        oldDPadDownPressed = dPadDownPressed;
+        oldDPadUpPressed = dPadUpPressed;
+        oldDPadLeftPressed = dPadLeftPressed;
+        oldDPadRightPressed = dPadRightPressed;
+        oldLeftBumperPressed = leftBumperPressed;
+        oldRightBumperPressed = rightBumperPressed;
+        oldaButtonPressed = aButtonPressed;
+        oldbButtonPressed = bButtonPressed;
+        oldxButtonPressed = xButtonPressed;
+        oldyButtonPressed = yButtonPressed;
+
+
+        double elPosition = elMotor.getCurrentPosition();
+        double exPosition = exMotor.getCurrentPosition();
+        double LAPosition = LAMotor.getCurrentPosition();
+        double RAPosition = RAMotor.getCurrentPosition();
+
+
+        double elDesiredPosition = elMotor.getTargetPosition();
+        double exDesiredPosition = exMotor.getTargetPosition();
+        double LADesiredPosition = LAMotor.getTargetPosition();
+        double RADesiredPosition = RAMotor.getTargetPosition();
+
+        telemetry.addData("EL Encoder Position", elPosition);
+        telemetry.addData("EX Encoder Position", exPosition);
+        telemetry.addData("LA Encoder Position", LAPosition);
+        telemetry.addData("RA Encoder Position", RAPosition);
+        telemetry.addData("EL Encoder Targeted Position", elDesiredPosition);
+        telemetry.addData("EX Encoder Targeted Position", exDesiredPosition);
+        telemetry.addData("LA Encoder Targeted Position", LADesiredPosition);
+        telemetry.addData("RA Encoder Targeted Position", RADesiredPosition);
+        telemetry.update();
+    }
+
+
+    /*
+     * Code to run ONCE after the driver hits STOP
+     */
+
+    @Override
+    public void stop() {
+    }
+}
