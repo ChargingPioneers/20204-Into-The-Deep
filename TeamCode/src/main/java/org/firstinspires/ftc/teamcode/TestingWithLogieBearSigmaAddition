@@ -65,12 +65,16 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     private DcMotor FRMotor = null;
     private DcMotor BLMotor = null;
     private DcMotor BRMotor = null;
-    private Servo pinchServo = null;
-    private Servo lWristServo = null;
-    private Servo rWristServo = null;
-    private Servo elServo = null;
+    private Servo topPinchServo = null;
+    private Servo bottomPinchServo = null;
+    private Servo rRServo = null;
+    private Servo rLServo = null;
+    private Servo lRServo = null;
+    private Servo lLServo=null;
+    private Servo topLServo = null;
+    private Servo topRServo = null;
+    private Servo topWristServo = null;
     private Servo wristJinkServo = null;
-
 
 
     private boolean dPadUpPressed;
@@ -92,11 +96,16 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     //private boolean isTargetAndCurrentLAPositionTheSame = false;
     //private boolean isTargetAndCurrentRAPositionTheSame = false;
 
-    private double[] PinchPositions = TeleOpServoConstantsSigmaAddition.PinchPositions;
-    private double[] lWristPositions = TeleOpServoConstantsSigmaAddition.lWristPositions;
-    private double[] rWristPositions = TeleOpServoConstantsSigmaAddition.rWristPositions;
-    private double[] wristJinkPositions = TeleOpServoConstantsSigmaAddition.wristJinkPositions;
-    private double[] elPositions = TeleOpServoConstantsSigmaAddition.elPositions;
+    private double[] topPinchPositions = TeleOpServoConstantsSigmaAddition.topPinchPositions;
+    private double[] bottomPinchPositions = TeleOpServoConstantsSigmaAddition.bottomPinchPositions;
+    private double[] rRPositions = TeleOpServoConstantsSigmaAddition.rRPositions;
+    private double[] rLPositions = TeleOpServoConstantsSigmaAddition.rLPositions;
+    private double[] lRPositions = TeleOpServoConstantsSigmaAddition.lRPositions;
+    private double[] lLPositions = TeleOpServoConstantsSigmaAddition.lLPositions;
+    //private double[] wristJinkPositions = TeleOpServoConstantsSigmaAddition.wristJinkPositions;
+    private double[] topLPositions = TeleOpServoConstantsSigmaAddition.topLPositions;
+    private double[] topRPositions = TeleOpServoConstantsSigmaAddition.topRPositions;
+    private double[] topWristPositions = TeleOpServoConstantsSigmaAddition.topWristPositions;
     private int[] vExPositions = TeleOpServoConstantsSigmaAddition.vExPositions;
     private int[] hExPositions = TeleOpServoConstantsSigmaAddition.hExPositions;
     //private int[]LAPositions = TeleOpServoConstants.LAPositions;
@@ -152,53 +161,103 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
         }
     }
 
-    class lWristPosition extends TimerTask {
+    class rRPosition extends TimerTask {
         int i;
 
-        public lWristPosition(int i) {
+        public rRPosition(int i) {
             this.i = i;
         }
 
         public void run() {
-            lWristServo.setPosition(lWristPositions[i]);
+            rRServo.setPosition(rRPositions[i]);
         }
     }
 
-    class rWristPosition extends TimerTask {
+    class rLPosition extends TimerTask {
         int i;
 
-        public rWristPosition(int i) {
+        public rLPosition(int i) {
             this.i = i;
         }
 
         public void run() {
-            rWristServo.setPosition(rWristPositions[i]);
+            rLServo.setPosition(rLPositions[i]);
         }
     }
 
-    class wristJinkPosition extends TimerTask {
+    class lRPosition extends TimerTask {
         int i;
 
-        public wristJinkPosition(int i) {
+        public lRPosition(int i) {
             this.i = i;
         }
 
         public void run() {
-            lWristServo.setPosition(lWristPositions[i]);
+            lRServo.setPosition(lRPositions[i]);
         }
     }
 
-    class elPosition extends TimerTask {
+    class lLPosition extends TimerTask {
         int i;
 
-        public elPosition(int i) {
+        public lLPosition(int i) {
             this.i = i;
         }
 
         public void run() {
-            rWristServo.setPosition(rWristPositions[i]);
+            lLServo.setPosition(lLPositions[i]);
         }
     }
+
+    class topLPosition extends TimerTask {
+        int i;
+
+        public topLPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topLServo.setPosition(topLPositions[i]);
+        }
+    }
+
+    class topRPosition extends TimerTask {
+        int i;
+
+        public topRPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topRServo.setPosition(topRPositions[i]);
+        }
+    }
+
+    class topWristPosition extends TimerTask {
+        int i;
+
+        public topWristPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topWristServo.setPosition(topWristPositions[i]);
+        }
+    }
+
+//    class wristJinkPosition extends TimerTask {
+//        int i;
+//
+//        public wristJinkPosition(int i) {
+//            this.i = i;
+//        }
+//
+//        public void run() {
+//            wristJinkServo.setPosition(wristJinkPositions[i]);
+//        }
+//    }
+
+
 
     /*class LAPosition extends TimerTask {
         int i;
@@ -253,11 +312,16 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
         BRMotor = hardwareMap.get(DcMotor.class, "BR");
         //LAMotor = hardwareMap.get(DcMotor.class, "LA");
         // RAMotor = hardwareMap.get(DcMotor.class, "RA");
-        pinchServo = hardwareMap.get(Servo.class, "Pincher");
-        lWristServo = hardwareMap.get(Servo.class, "Left Wrist Servo");
-        rWristServo = hardwareMap.get(Servo.class, "Right Wrist Servo");
-        elServo = hardwareMap.get(Servo.class, "Elbow Servo");
-        wristJinkServo = hardwareMap.get(Servo.class, "Wrist (Jink) Servo");
+        topPinchServo = hardwareMap.get(Servo.class, "Top Pincher");
+        bottomPinchServo = hardwareMap.get(Servo.class, "Bottom Pincher");
+        rRServo = hardwareMap.get(Servo.class, "Right Right Wrist Servo");
+        rLServo = hardwareMap.get(Servo.class, "Right Left Wrist Servo");
+        lRServo = hardwareMap.get(Servo.class, "Left Right Wrist Servo");
+        lLServo = hardwareMap.get(Servo.class, "Left Left Wrist Servo");
+        topLServo = hardwareMap.get(Servo.class, "Top Left Servo");
+        topRServo = hardwareMap.get(Servo.class, "Top Right Servo");
+        topWristServo = hardwareMap.get(Servo.class, "Top Wrist Servo");
+//        wristJinkServo = hardwareMap.get(Servo.class, "Wrist (Jink) Servo");
         timer = new Timer();
 
         vExMotor.setTargetPosition(vExPositions[0]);
@@ -360,6 +424,7 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
                     BRMotor.setPower(-1);
                 }
             }
+
             //   }
         } else {
             FLMotor.setPower(FLPower);
@@ -414,12 +479,19 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
             Wrist.setPosition(WristPositions[1]);
         }*/
 
-        //Claw Control
-        if (leftBumperPressed && !oldLeftBumperPressed) {
-            pinchServo.setPosition(PinchPositions[0]);
-        } else if (rightBumperPressed && !oldRightBumperPressed) {
-            pinchServo.setPosition(PinchPositions[1]);
-        }
+        //Claw Control SINFKJLNRHJMVGFHKJOTXDCFYUBHIJXETRCYUVIOJGCDXRYCBUIJPHUGYTCRNIMO<K{UG&YBIUMO<OKPJIGFHIO
+//        if (leftBumperPressed && !oldLeftBumperPressed) {
+//            pinchServo.setPosition(PinchPositions[0]);
+//        } else if (rightBumperPressed && !oldRightBumperPressed) {
+//            pinchServo.setPosition(PinchPositions[1]);
+//        }
+//
+//        if (leftBumperPressed && !oldLeftBumperPressed) {
+//            pinchServo.setPosition(PinchPositions[0]);
+//        } else if (rightBumperPressed && !oldRightBumperPressed) {
+//            pinchServo.setPosition(PinchPositions[1]);
+//        }
+
 
         /*if (lExMotor.getCurrentPosition() == lExMotor.getTargetPosition()) {
             isTargetAndCurrentPositionTheSame = true;
@@ -461,71 +533,95 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
             RAMotor.setPower(0);
         }*/
 
-
         if (aButtonPressed && !oldaButtonPressed && !isArmMoving) { //neutral position index = 0
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
+
 
 
         }if (bButtonPressed && !oldbButtonPressed && !isArmMoving) { //intake index = 1
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
 
         }if (xButtonPressed && !oldxButtonPressed && !isArmMoving) { //low basket index = 2
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
 
         }if (yButtonPressed && !oldyButtonPressed && !isArmMoving) { //high basket index = 3
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
 
         }if (dPadUpPressed && !oldDPadUpPressed && !isArmMoving) { //high rung index = 3
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
 
         }if (dPadLeftPressed && !oldDPadLeftPressed && !isArmMoving) { //high rung down index = 3
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
 
         }if (dPadDownPressed && !oldDPadDownPressed && !isArmMoving) { //Low rung index = 3
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
 
         }if (dPadRightPressed && !oldDPadRightPressed && !isArmMoving) { //Low rung down index = 3
             timer.schedule(new vExPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
             timer.schedule(new hExPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new lWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new rWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new elPosition(2), 8 * DELAY_BETWEEN_MOVES);
-            timer.schedule(new wristJinkPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(2), 8 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 8 * DELAY_BETWEEN_MOVES);
         }
 
 
@@ -574,4 +670,4 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     }
 }
 
-
+//https://www.google.com/search?sca_esv=c7c67eb20f0b5775&rlz=1C1GCEA_enUS1131US1131&q=clearly+you+don%27t+own+an+air+fryer&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3JyWp6w6_rxLPe8F8fpm5a57iruiBaetC-P1z8A1EgSEtGoKiI-tyuuiDuAjQZN76zaAbPytU70vrRXfg6Tgzjij5R_Re136YiAiZQmK01ZhFDaBKvuWzjRrVqF2bxrJnMYbpGsRQzdzMtgTRsg_T6B4z0T9loWGkBjDF7Xezy_v0ygoVag&sa=X&ved=2ahUKEwjq9qWr3raKAxVQElkFHYH2IEQQtKgLegQIFBAB&biw=1536&bih=695&dpr=1.25&safe=active&ssui=on#vhid=wbIFEtSOIZAwvM&vssid=mosaic
