@@ -1,0 +1,543 @@
+/////*
+//// * Copyright (c) 2020 OpenFTC Team
+//// *
+//// * Permission is hereby granted, free of charge, to any person obtaining a copy
+//// * of this software and associated documentation files (the "Software"), to deal
+//// * in the Software without restriction, including without limitation the rights
+//// * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//// * copies of the Software, and to permit persons to whom the Software is
+//// * furnished to do so, subject to the following conditions:
+//// *
+//// * The above copyright notice and this permission notice shall be included in all
+//// * copies or substantial portions of the Software.
+//// * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//// * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//// * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//// * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//// * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//// * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//// * SOFTWARE.
+//// */
+//
+//package org.firstinspires.ftc.teamcode;
+//
+//import androidx.annotation.NonNull;
+//
+//import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+//import com.acmerobotics.roadrunner.Action;
+//import com.acmerobotics.roadrunner.AngularVelConstraint;
+//import com.acmerobotics.roadrunner.ParallelAction;
+//import com.acmerobotics.roadrunner.Pose2d;
+//import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+//import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+//import com.acmerobotics.roadrunner.Vector2d;
+//import com.acmerobotics.roadrunner.ftc.Actions;
+//import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+//import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+//import com.qualcomm.robotcore.hardware.CRServo;
+//import com.qualcomm.robotcore.hardware.DcMotor;
+//import com.qualcomm.robotcore.hardware.Servo;
+//import com.qualcomm.robotcore.util.ElapsedTime;
+//
+//import org.firstinspires.ftc.teamcode.constants.AutoServoConstants;
+//import org.firstinspires.ftc.teamcode.constants.TeleOpServoConstants;
+//import org.firstinspires.ftc.teamcode.MecanumDrive;
+//
+//import java.util.Timer;
+//import java.util.TimerTask;
+//
+//
+///*
+// * This sample demonstrates a basic (but battle-tested and essentially
+// * 100% accurate) method of detecting the TeamElement when lined up with
+// * the sample regions over the first 3 stones.
+// */
+//@Autonomous(name = "Left")
+////@Disabled
+//public class SigmaAutoSkibidiLeft extends LinearOpMode
+//{
+//    private ElapsedTime runtime = new ElapsedTime();
+//    private DcMotor elMotor = null;
+//    private DcMotor exMotor = null;
+//    private DcMotor FLMotor = null;
+//    private DcMotor FRMotor = null;
+//    private DcMotor BLMotor = null;
+//    private DcMotor BRMotor = null;
+//    private DcMotor LAMotor = null;
+//    private DcMotor RAMotor = null;
+//    private Servo Claw = null;
+//    private Servo Wrist = null;
+//
+//    private double elbowPower = 0.5;
+//    private double[] ClawPositions = TeleOpServoConstants.ClawPositions;
+//    private double[] WristPositions = TeleOpServoConstants.WristPositions;
+//    private int[] ExtensionPositions = TeleOpServoConstants.ExtensionPositions;
+//    private int[] ElbowPositions = TeleOpServoConstants.ElbowPositions;
+//    private int[]LAPositions = TeleOpServoConstants.LAPositions;
+//    private int[]RAPositions = TeleOpServoConstants.RAPositions;
+//
+//    enum DriveDirection {
+//        FORWARD,
+//        LEFT,
+//        RIGHT,
+//        BACKWARD
+//    }
+//
+//    enum StartingPositionEnum {
+//        LEFT,
+//        RIGHT
+//    }
+//
+//    enum SlidePackDirection {
+//        UP,
+//        DOWN
+//    }
+//
+//
+//    private Timer timer = new Timer();
+//
+//
+//    private ElapsedTime eTime = new ElapsedTime();
+//
+//    private int index = 0;
+//    private int wristIndex;
+//
+//
+//    private final int DELAY_BETWEEN_MOVES = 100;
+//
+//    class ElbowPosition extends TimerTask {
+//        int i;
+//        double power;
+//
+//        public ElbowPosition(int i, double power) {
+//            this.i = i;
+//            this.power = power;
+//
+//        }
+//
+//        public void run() {
+//            elMotor.setTargetPosition(ElbowPositions[i]);
+//            elMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            elMotor.setPower(power);
+//        }
+//    }
+//
+//
+//    class ExtensionPosition extends TimerTask {
+//        int i;
+//        double power;
+//
+//        public ExtensionPosition(int i, double power) {
+//            this.i = i;
+//            this.power = power;
+//
+//        }
+//
+//        public void run() {
+//            exMotor.setTargetPosition(ExtensionPositions[i]);
+//            exMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            exMotor.setPower(1);
+//        }
+//    }
+//    class LAPosition extends TimerTask {
+//        int i;
+//        double power;
+//
+//        public LAPosition(int i, double power) {
+//            this.i = i;
+//            this.power = power;
+//
+//        }
+//
+//        public void run() {
+//            LAMotor.setTargetPosition(LAPositions[i]);
+//            LAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            LAMotor.setPower(power);
+//        }
+//    }
+//
+//    class RAPosition extends TimerTask {
+//        int i;
+//        double power;
+//
+//        public RAPosition(int i, double power) {
+//            this.i = i;
+//            this.power = power;
+//
+//        }
+//
+//        public void run() {
+//            RAMotor.setTargetPosition(RAPositions[i]);
+//            RAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            RAMotor.setPower(power);
+//        }
+//    }
+//
+//
+//    class WristPosition extends TimerTask {
+//        int i;
+//
+//        public WristPosition(int i) {
+//            this.i = i;
+//        }
+//
+//        public void run() {
+//            Wrist.setPosition(WristPositions[i]);
+//        }
+//    }
+//
+//
+//
+//    StartingPositionEnum sideOfFieldToStartOn = StartingPositionEnum.LEFT;
+//
+//    @Override
+//    public void runOpMode()
+//    {elMotor = hardwareMap.get(DcMotor.class, "elbowMotor");
+//        exMotor = hardwareMap.get(DcMotor.class, "extensionMotor");
+//        FLMotor = hardwareMap.get(DcMotor.class, "FL");
+//        FRMotor = hardwareMap.get(DcMotor.class, "FR");
+//        BLMotor = hardwareMap.get(DcMotor.class, "BL");
+//        BRMotor = hardwareMap.get(DcMotor.class, "BR");
+//        LAMotor = hardwareMap.get(DcMotor.class, "LA");
+//        RAMotor = hardwareMap.get(DcMotor.class, "RA");
+//        Claw = hardwareMap.get(Servo.class, "Claw");
+//        Wrist = hardwareMap.get(Servo.class, "Wrist");
+//        timer = new Timer();
+//
+//        elMotor.setTargetPosition(ElbowPositions[0]);
+//        exMotor.setTargetPosition(ExtensionPositions[0]);
+//        LAMotor.setTargetPosition(LAPositions[0]);
+//        RAMotor.setTargetPosition(RAPositions[0]);
+//
+//
+//        elMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        elMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        exMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        exMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        LAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        LAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        RAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        RAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//
+//
+//
+//
+//        FLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        FRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        BLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        BRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//
+//        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+//        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
+//        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+//        elMotor.setDirection(DcMotor.Direction.FORWARD);
+//        exMotor.setDirection(DcMotor.Direction.FORWARD);
+//        FLMotor.setDirection(DcMotor.Direction.REVERSE);
+//        FRMotor.setDirection(DcMotor.Direction.FORWARD);
+//        BLMotor.setDirection(DcMotor.Direction.REVERSE);
+//        BRMotor.setDirection(DcMotor.Direction.FORWARD);
+//        RAMotor.setDirection(DcMotor.Direction.FORWARD);
+//        LAMotor.setDirection(DcMotor.Direction.FORWARD);
+//
+//
+//        Wrist.setPosition(WristPositions[1]);
+//
+//        /**
+//         * NOTE: Many comments have been omitted from this sample for the
+//         * sake of conciseness. If you're just starting out with EasyOpenCv,
+//         * you should take a look at {@link InternalCamera1Example} or its
+//         * webcam counterpart, {@link WebcamExample} first.
+//         */
+//
+//
+//        telemetry.addData("Status", "sInitialized");
+//        telemetry.update();
+//
+//
+//        // Initialize the hardware variables. Note that the strings used here as parameters
+//        // to 'get' must correspond to the names assigned during the robot configuration
+//        // step (using the FTC Robot Controller app on the phone).
+//
+//
+//        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+//        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
+//        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+//
+//
+//
+//        // Wait for the game to start (driver presses PLAY)
+//
+//
+//
+//        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
+//        // out when the RC activity is in portrait. We do our actual image processing assuming
+//        // landscape orientation, though.
+////        webcam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+//
+//        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(-36, -67, Math.PI / 2));
+////        timer.schedule(new PutGrabberToCertainPosition(0), 3000);
+//        waitForStart();
+//        while (opModeIsActive())
+//        {
+//
+//            doActions(drive, sideOfFieldToStartOn);
+//
+//            // Don't burn CPU cycles busy-looping in this sample
+//            sleep(15000);
+//            break;
+//        }
+//
+//    }
+//
+//    public class PlaceSampleIntoHighBucket implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//             timer.schedule(new ElbowPosition(3, 0.4), 0 * DELAY_BETWEEN_MOVES);
+//             timer.schedule(new ExtensionPosition(3, 1), 8 * DELAY_BETWEEN_MOVES);
+//
+//             return false;
+//        }
+//    }
+//    public class PlaceWristPosition implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            timer.schedule(new WristPosition(2), 0 * DELAY_BETWEEN_MOVES);
+//            return false;
+//        }
+//    }
+//
+//    public class IntakeWristPosition implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            timer.schedule(new WristPosition(0), 0 * DELAY_BETWEEN_MOVES);
+//            return false;
+//        }
+//    }
+//
+//    public class IntakeSample implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            timer.schedule(new ElbowPosition(1, 0.7), 0 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new ExtensionPosition(1, 0.7), 6 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new WristPosition(0), 6 * DELAY_BETWEEN_MOVES);
+//            return false;
+//        }
+//    }
+//
+//    public class ClawClose implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            Claw.setPosition(ClawPositions[1]);
+//            return false;
+//        }
+//    }
+//    public class ClawOpen implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            Claw.setPosition(ClawPositions[0]);
+//            return false;
+//        }
+//    }
+//
+//    public class end implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            timer.schedule(new ElbowPosition(2, 0.4), 0 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new ExtensionPosition(2, 0.7), 8 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new WristPosition(2), 8 * DELAY_BETWEEN_MOVES);
+//            return false;
+//        }
+//    }
+//
+//    public class Neutralpos implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//             timer.schedule(new ExtensionPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
+//             timer.schedule(new ElbowPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
+//             timer.schedule(new WristPosition(2), 8 * DELAY_BETWEEN_MOVES);
+//            return false;
+//        }
+//    }
+//
+//    public class Extendo implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            timer.schedule(new ExtensionPosition(0, 1), 0 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new ElbowPosition(0, 0.3), 8 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new WristPosition(2), 8 * DELAY_BETWEEN_MOVES);
+//            return false;
+//        }
+//    }
+//    public class Nah implements Action {
+//
+//        int ex;
+//        int el;
+//        int w;
+//        public Nah (int ex, int el, int w){
+//            this.ex = ex;
+//            this.el = el;
+//            this.w = w;
+//        }
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            timer.schedule(new ExtensionPosition(ex, 1),0 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new ElbowPosition(el, 0.3),4 * DELAY_BETWEEN_MOVES);
+//            timer.schedule(new WristPosition(w), 4 * DELAY_BETWEEN_MOVES);
+//            return false;
+//        }
+//    }
+//
+//
+//    private void doActions(MecanumDrive drive, StartingPositionEnum position) {
+////        smp = SpikeMarkPosition.TRES;
+//        boolean needInvert = (position != StartingPositionEnum.RIGHT);
+//        double multiplier = 1;
+//        if (needInvert) {
+//            multiplier = -1;
+//        }
+////        timer.schedule(new LowerArmToCertainServoPosition(4),  2 * DELAY_BETWEEN_MOVES);
+////        timer.schedule(new MoveWristServoPosition(0), 0 * DELAY_BETWEEN_MOVES);
+//
+//
+//        TrajectoryActionBuilder actionBuilder = drive.actionBuilder(drive.pose);
+// //actually a genius
+//
+//               //Actions.runBlocking(new ParallelAction(drive.actionBuilder(drive.pose).strafeToConstantHeading(new Vector2d(-40, -33)).build(), drive.actionBuilder(drive.pose).turn(13*(Math.PI/16)).build())); //god dayum this is ugly
+//        //Actions.runBlocking(new ParallelAction(actionBuilder.build(), actionBuilder.build())); //figured it out :)
+//
+//
+//
+//        //Driving to the position and extending the arm
+//        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-50, -52), (Math.PI/4), new TranslationalVelConstraint(70)).build(), actionBuilder.afterTime(1.25, new PlaceSampleIntoHighBucket()).build()));
+//        actionBuilder = drive.actionBuilder(drive.pose);
+//        Actions.runBlocking(actionBuilder.waitSeconds(0.25).build());
+//
+//        //Getting closer to the bin and droping it in
+//        Actions.runBlocking(actionBuilder.strafeToConstantHeading(new Vector2d(-53,-53)).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(0.75).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.25, new PlaceWristPosition()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.75, new ClawOpen()).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+//
+//        //Driving away and getting ready to pick up the 1st sample
+//        actionBuilder = drive.actionBuilder(Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-44, -47), (9*(Math.PI/16)), new AngularVelConstraint(2*Math.PI)).build(), actionBuilder.afterTime(1.25, new Neutralpos()).build()));ive.pose);
+//        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.25, new IntakeWristPosition()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(1, new IntakeSample()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(1.5, new ClawClose()).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(.5).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0, new Neutralpos()).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+//
+//
+//
+//        // Driving back to place the sample into the bin
+//        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-50, -50), (Math.PI/4), new AngularVelConstraint(2*Math.PI)).build(), actionBuilder.afterTime(0, new PlaceSampleIntoHighBucket()).build()));
+//        actionBuilder = drive.actionBuilder(drive.pose);
+//        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+//        Actions.runBlocking(actionBuilder.strafeToConstantHeading(new Vector2d(-53,-53)).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(0.25).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.25, new PlaceWristPosition()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.75  , new ClawOpen()).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+//
+//        // Picking up 2nd sample
+//        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-55, -47), (9*(Math.PI/16)), new AngularVelConstraint(2*Math.PI)).build(), actionBuilder.afterTime(1.25, new Neutralpos()).build()));
+//        actionBuilder = drive.actionBuilder(drive.pose);
+//        Actions.runBlocking(actionBuilder.afterTime(0, new Neutralpos()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(1.25  , new IntakeSample()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.25, new IntakeWristPosition()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(2  , new ClawClose()).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(.5).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0, new Neutralpos()).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+//
+//        // Driving back to place the sample into the bin
+//        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-50, -50), (Math.PI/4), new AngularVelConstraint(2*Math.PI)).build(), actionBuilder.afterTime(0, new PlaceSampleIntoHighBucket()).build()));
+//        actionBuilder = drive.actionBuilder(drive.pose);
+//        Actions.runBlocking(actionBuilder.waitSeconds(0.75).build());
+//        Actions.runBlocking(actionBuilder.strafeToConstantHeading(new Vector2d(-53,-52.1)).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(0.25).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.25, new PlaceWristPosition()).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0.75  , new ClawOpen()).build());
+//        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+//
+//        //Go back to neutral
+//        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-55, -47), (9*(Math.PI/16)), new AngularVelConstraint(2*Math.PI)).build()));
+//        actionBuilder = drive.actionBuilder(drive.pose);
+//        Actions.runBlocking(actionBuilder.afterTime(0, new Nah(0, 2, 1)).build());
+//        Actions.runBlocking(actionBuilder.afterTime(0, new end()).build());
+//
+//
+////        //first sample
+////        Actions.runBlocking(new ParallelAction(actionBuilder.afterTime(1, new Extendo()).build(), actionBuilder.strafeToLinearHeading(new Vector2d(-31.2, -22.5), (15*Math.PI/16)).build(), actionBuilder.afterTime(0, new moveArm(0, 7)).build()));
+////        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToConstantHeading(new Vector2d(-44, -23)).build(), actionBuilder.afterTime(0, new Intake()).build()));
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-50, -52), 21*(Math.PI/16)).build(), actionBuilder.afterTime(0, new moveArm(1, 0)).build(), actionBuilder.afterTime(0, new PlaceSampleIntoBucket()).build()));
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////
+////        Actions.runBlocking(actionBuilder.strafeToConstantHeading(new Vector2d(-55, -67.5)).build());
+////        Actions.runBlocking(actionBuilder.afterTime(0, new Outtake()).build());
+////        Actions.runBlocking(actionBuilder.waitSeconds(0.7).build());
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////
+////        //second sample
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-40, -21.5), (Math.PI)).build(), actionBuilder.afterTime(1, new moveArm(0, 1)).build(), actionBuilder.afterTime(1, new IntakeSample()).build()));
+////        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToConstantHeading(new Vector2d(-50, -21.5)).build(), actionBuilder.afterTime(0, new Intake()).build()));
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-50, -52), 21*(Math.PI/16)).build(), actionBuilder.afterTime(0, new moveArm(1, 0)).build(), actionBuilder.afterTime(0, new PlaceSampleIntoBucket()).build()));
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////
+////        Actions.runBlocking(actionBuilder.strafeToConstantHeading(new Vector2d(-55, -67.5)).build());
+////        Actions.runBlocking(actionBuilder.afterTime(0, new Outtake()).build());
+////        Actions.runBlocking(actionBuilder.waitSeconds(0.7).build());
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////
+////        //third sample
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-52, -23), (Math.PI)).build(), actionBuilder.afterTime(1, new moveArm(0, 1)).build(), actionBuilder.afterTime(1, new IntakeSample()).build()));
+////        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToConstantHeading(new Vector2d(-59, -25)).build(), actionBuilder.afterTime(0, new Intake()).build()));
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-50, -52), 21*(Math.PI/16)).build(), actionBuilder.afterTime(0, new moveArm(1, 0)).build(), actionBuilder.afterTime(0, new PlaceSampleIntoBucket()).build()));
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////
+////        Actions.runBlocking(actionBuilder.strafeToConstantHeading(new Vector2d(-54, -68.5)).build());
+////        Actions.runBlocking(actionBuilder.afterTime(0, new Outtake()).build());
+////        Actions.runBlocking(actionBuilder.waitSeconds(0.7).build());
+////        actionBuilder = drive.actionBuilder(drive.pose);
+////        Actions.runBlocking(new ParallelAction(actionBuilder.afterTime(0, new Move(0, 0, 0, 0)).build(), actionBuilder.afterTime(0, new moveArm(0, 0)).build(), actionBuilder.afterTime(0.5, new IntakeSample()).build(), actionBuilder.strafeToConstantHeading(new Vector2d(-50, -52)).build()));
+////        sleep(4000);
+//    }
+//
+//    private DriveDirection getCorrectDirection(DriveDirection direction, boolean needInvert) {
+//        if (!needInvert)
+//            return direction;
+//
+//        DriveDirection invertedDirection = direction;
+//        switch (direction) {
+//            case LEFT:
+//                invertedDirection = DriveDirection.RIGHT;
+//                break;
+//            case RIGHT:
+//                invertedDirection = DriveDirection.LEFT;
+//                break;
+//            case FORWARD:
+//                invertedDirection = DriveDirection.BACKWARD;
+//                break;
+//            case BACKWARD:
+//                invertedDirection = DriveDirection.FORWARD;
+//                break;
+//            default:
+//                break;
+//        }
+//
+//        double elPosition = elMotor;
