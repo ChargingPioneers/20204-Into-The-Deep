@@ -1,16 +1,63 @@
 package org.firstinspires.ftc.teamcode.constants;
 public class TeleOpServoConstantsSigmaAddition {
-    public static final double[] topPinchPositions = {0.35, 0.2}; //
-    public static final double[] bottomPinchPositions = {0.35, 0.2}; //
-    public static final double[] rRPositions = {0.0, 0.9, 0.85, 0.5}; //Down, Middle Up
-    public static final double[] rLPositions= {0, 0, 0, 0};
-    public static final double[] lRPositions = {0.0, 0.9, 0.85, 0.5}; //Down, Middle Up
-    public static final double[] lLPositions= {0, 0, 0, 0};
-    public static final double[] topLPositions = {3, 3, -791, -735,-450,-100};
-    public static final double[] topRPositions = {3, 3, -791, -735,-450,-100};
-    public static final double[] topWristPositions = {3, 3, -791, -735,-450,-100};
-    public static final int[] vExPositions = {3, 3, -791, -735,-450,-100};
-    public static final int[] hExPositions = {3, 3, -791, -735,-450,-100};
+
+    public static final double[] topLPositions = {.3, 0.7, 0.3,0.22, 0.95, 0.45,0.2};
+    // 0.25 - inital position (front horiz)
+    // 0.55 - high basket placement (direct up)
+    // 0.12 - Actual transfer (Front horiz but quite down)
+    // 0.2 - Beginning of transfer (Front horiz but a tad down)
+    // 0.95 - Back wall grab (Back)
+    // 0.45 - High Rung placement (Direct up with a tad forward)
+
+    public static final double[] topRPositions = {.3, 0.7, 0.3,0.22, 0.95, 0.45,0.2};
+    // 0.25 - inital position (front horiz)
+    // 0.55 - high basket placement (direct up)
+    // 0.12 - Actual transfer (Front horiz but quite down)
+    // 0.2 - Beginning of transfer (Front horiz but a tad down)
+    // 0.95 - Back wall grab (Back)
+    // 0.45 - High Rung placement (Direct up with a tad forward)
+
+    public static final double[] topWristPositions = {0, 0.55, 0.92,1, 0.75, 0.15};
+    // 0 - inital position (all back)
+    // 0.55 - high basket (direct up with a tad back)
+    // 0.92 - Transfer position (Forward)
+    // 1 - Second transfer Postion (more forward)
+    // 0.75 - Back wall grab (Direct up with a tad forward)
+    // 0.15 - High Rung placement (Back)
+
+    public static final double[] topPinchPositions = {0.0, 0.75, 0.38};
+    // 0.0 - Open
+    // 0.75 - Close
+    // 0.4 - Middle
+
+    //----------------------------------------------------------------- MOTORS
+
+    public static final int[] vExPositions = {10, 1560};
+    // 0 - initial position (none)
+    // 1560 - high basket (all the way up)
+
+    public static final int[] vExPositions2 = {10, -1560};
+    // 0 - initial position (none)
+    // -1560 - high basket (all the way up)
+
+    public static final int[] hExPositions = {120, 500, 150,0};
+    // Transfer pos (all the way back)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static final double[] rRPositions = {0.1,.455,0.15,0.05, .15}; //Down, Middle Up
+    public static final double[] lLPositions= {0.1,.455,0.15,0.05, .15};
     //public static final double[] wristJinkPositions = {3, 3, -791, -735,-450,-100};
     //public static final int[] LAPositions = {9904,5499};
     //public static final int[] RAPositions = {8996,4589};
