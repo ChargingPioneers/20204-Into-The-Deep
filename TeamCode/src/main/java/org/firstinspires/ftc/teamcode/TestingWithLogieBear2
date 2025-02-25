@@ -235,22 +235,22 @@ public class TestingWithLogieBear2 extends OpMode {
         timer = new Timer();
 
         elMotor.setTargetPosition(ElbowPositions[0]);
-        exMotor.setTargetPosition(ExtensionPositions[0]);
+        exMotor.setTargetPosition(ExtensionPositions[2]);
         LAMotor.setTargetPosition(LAPositions[0]);
         RAMotor.setTargetPosition(RAPositions[0]);
 
 
-        elMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        elMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        elMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        exMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        exMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        LAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        RAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        exMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        exMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        LAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        LAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        RAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        RAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
 
@@ -260,8 +260,6 @@ public class TestingWithLogieBear2 extends OpMode {
         FRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        elMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        exMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
@@ -270,7 +268,7 @@ public class TestingWithLogieBear2 extends OpMode {
         exMotor.setDirection(DcMotor.Direction.FORWARD);
         FLMotor.setDirection(DcMotor.Direction.REVERSE);
         FRMotor.setDirection(DcMotor.Direction.FORWARD);
-        BLMotor.setDirection(DcMotor.Direction.REVERSE);
+        BLMotor.setDirection(DcMotor.Direction.FORWARD);
         BRMotor.setDirection(DcMotor.Direction.FORWARD);
         RAMotor.setDirection(DcMotor.Direction.FORWARD);
         LAMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -281,6 +279,9 @@ public class TestingWithLogieBear2 extends OpMode {
 
         //Wrist Postition
         Wrist.setPosition(WristPositions[1]);
+        timer.schedule(new ExtensionPosition(0, 1), 8 * DELAY_BETWEEN_MOVES);
+
+
     }
 
     /*
@@ -491,7 +492,7 @@ public class TestingWithLogieBear2 extends OpMode {
                 timer.schedule(new setIsArmMoving(false), 12 * DELAY_BETWEEN_MOVES);
                 index = 2;
 
-            }else if (dPadDownPressed && !oldDPadDownPressed && !isArmMoving) { //Low rung down index = 3
+            }else if (dPadDownPressed && !oldDPadDownPressed && !isArmMoving) { //Low rung index = 3
                 new setIsArmMoving(true).run();
                 timer.schedule(new ElbowPosition(0, 0.4), 0 * DELAY_BETWEEN_MOVES);
                 timer.schedule(new ExtensionPosition(0, 1), 8 * DELAY_BETWEEN_MOVES);
