@@ -1,0 +1,753 @@
+// * Copyright (c) 2020 OpenFTC Team
+// *
+// * Permission is hereby granted, free of charge, to any person obtaining a copy
+// * of this software and associated documentation files (the "Software"), to deal
+// * in the Software without restriction, including without limitation the rights
+// * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// * copies of the Software, and to permit persons to whom the Software is
+// * furnished to do so, subject to the following conditions:
+// *
+// * The above copyright notice and this permission notice shall be included in all
+// * copies or substantial portions of the Software.
+// * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// * SOFTWARE.
+
+
+
+
+package org.firstinspires.ftc.teamcode;
+
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.AngularVelConstraint;
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.constants.AutoServoConstants;
+import org.firstinspires.ftc.teamcode.constants.TeleOpServoConstants;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.constants.TeleOpServoConstantsSigmaAddition;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+
+
+
+/** This sample demonstrates a basic (but battle-tested and essentially
+ * 100% accurate) method of detecting the TeamElement when lined up with
+ * the sample regions over the first 3 stones.
+ */
+
+@Autonomous(name = "Left")
+public class SigmaAutoSkibidiLeftSigmaAddition extends LinearOpMode
+{
+    private ElapsedTime runtime = new ElapsedTime();
+    private DcMotor vExMotor = null;
+    private DcMotor vExMotor2 = null;
+    private DcMotor hExMotor = null;
+    private DcMotor FLMotor = null;
+    private DcMotor FRMotor = null;
+    private DcMotor BLMotor = null;
+    private DcMotor BRMotor = null;
+    private DcMotor IMotor = null;
+    private Servo topPinchServo = null;
+    private Servo bottomPinchServo = null;
+    private Servo rRServo = null;
+    private Servo rLServo = null;
+    private Servo lRServo = null;
+    private Servo lLServo = null;
+    private Servo topLServo = null;
+    private Servo topRServo = null;
+    private Servo topWristServo = null;
+
+
+    private double[] topPinchPositions = TeleOpServoConstantsSigmaAddition.topPinchPositions;
+    private double[] rRPositions = TeleOpServoConstantsSigmaAddition.rRPositions;
+    private double[] lLPositions = TeleOpServoConstantsSigmaAddition.lLPositions;
+    private double[] topLPositions = TeleOpServoConstantsSigmaAddition.topLPositions;
+    private double[] topRPositions = TeleOpServoConstantsSigmaAddition.topRPositions;
+    private double[] topWristPositions = TeleOpServoConstantsSigmaAddition.topWristPositions;
+    private int[] vExPositions = TeleOpServoConstantsSigmaAddition.vExPositions;
+    private int[] vExPositions2 = TeleOpServoConstantsSigmaAddition.vExPositions2;
+    private int[] hExPositions = TeleOpServoConstantsSigmaAddition.hExPositions;
+
+
+    enum DriveDirection {
+        FORWARD,
+        LEFT,
+        RIGHT,
+        BACKWARD
+    }
+
+
+    enum StartingPositionEnum {
+        LEFT,
+        RIGHT
+    }
+
+
+    enum SlidePackDirection {
+        UP,
+        DOWN
+    }
+
+
+
+
+    private Timer timer = new Timer();
+
+
+
+    private ElapsedTime eTime = new ElapsedTime();
+
+
+    private int index = 0;
+    private int wristIndex;
+
+
+
+
+    private final int DELAY_BETWEEN_MOVES = 100;
+
+
+    class vExPosition extends TimerTask {
+        int i;
+        double power;
+
+        public vExPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            vExMotor.setTargetPosition(vExPositions[i]);
+            vExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            vExMotor.setPower(power);
+        }
+    }
+
+
+
+    class vExPosition2 extends TimerTask {
+        int i;
+        double power;
+
+        public vExPosition2(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            vExMotor2.setTargetPosition(vExPositions2[i]);
+            vExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            vExMotor2.setPower(power);
+        }
+    }
+    class vExPower extends TimerTask {
+        double power;
+
+        public vExPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            vExMotor.setPower(power);
+            vExMotor2.setPower(power);
+        }
+    }
+
+
+    class hExPosition extends TimerTask {
+        int i;
+        double power;
+
+        public hExPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            hExMotor.setTargetPosition(hExPositions[i]);
+            hExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            hExMotor.setPower(power);
+        }
+    }
+
+    class rRPosition extends TimerTask {
+        int i;
+
+        public rRPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            rRServo.setPosition(rRPositions[i]);
+        }
+    }
+
+
+
+    class lLPosition extends TimerTask {
+        int i;
+
+        public lLPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            lLServo.setPosition(lLPositions[i]);
+        }
+    }
+
+
+    class topLPosition extends TimerTask {
+        int i;
+
+        public topLPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topLServo.setPosition(topLPositions[i]);
+        }
+    }
+
+    class topRPosition extends TimerTask {
+        int i;
+
+        public topRPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topRServo.setPosition(topRPositions[i]);
+        }
+    }
+
+    class topWristPosition extends TimerTask {
+        int i;
+
+        public topWristPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topWristServo.setPosition(topWristPositions[i]);
+        }
+    }
+
+    class topPinchPosition extends TimerTask {
+        int i;
+
+        public topPinchPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topPinchServo.setPosition(topPinchPositions[i]);
+        }
+    }
+
+
+
+
+
+
+    StartingPositionEnum sideOfFieldToStartOn = StartingPositionEnum.LEFT;
+
+
+    @Override
+    public void runOpMode(){
+        vExMotor = hardwareMap.get(DcMotor.class, "vEx");
+        vExMotor2 = hardwareMap.get(DcMotor.class, "vEx2");
+        hExMotor = hardwareMap.get(DcMotor.class, "hEx");
+        //IServo = hardwareMap.get(CRServo.class, "IS");
+        IMotor = hardwareMap.get(DcMotor.class, "IM");
+        FLMotor = hardwareMap.get(DcMotor.class, "FL");
+        FRMotor = hardwareMap.get(DcMotor.class, "FR");
+        BLMotor = hardwareMap.get(DcMotor.class, "BL");
+        BRMotor = hardwareMap.get(DcMotor.class, "BR");
+        //LAMotor = hardwareMap.get(DcMotor.class, "LA");
+        // RAMotor = hardwareMap.get(DcMotor.class, "RA");
+        topPinchServo = hardwareMap.get(Servo.class, "Top Pinch");
+//      bottomPinchServo = hardwareMap.get(Servo.class, "Bottom Pinch");
+        rRServo = hardwareMap.get(Servo.class, "RR");
+        rLServo = hardwareMap.get(Servo.class, "RL");
+        lRServo = hardwareMap.get(Servo.class, "LR");
+        lLServo = hardwareMap.get(Servo.class, "LL");
+        topLServo = hardwareMap.get(Servo.class, "TL");
+        topRServo = hardwareMap.get(Servo.class, "TR");
+        topWristServo = hardwareMap.get(Servo.class, "TW");
+//      wristJinkServo = hardwareMap.get(Servo.class, "Wrist (Jink) Servo");
+        timer = new Timer();
+
+
+        vExMotor.setTargetPosition(vExPositions[0]);
+        vExMotor2.setTargetPosition(vExPositions2[0]);
+        hExMotor.setTargetPosition(hExPositions[0]);
+
+
+
+
+        vExMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        vExMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        hExMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+
+
+
+
+
+
+
+
+        FLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+/*
+
+To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+        Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
+            Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+*/
+
+        IMotor.setDirection(DcMotor.Direction.FORWARD);
+        vExMotor.setDirection(DcMotor.Direction.FORWARD);
+        vExMotor2.setDirection(DcMotor.Direction.FORWARD);
+        hExMotor.setDirection(DcMotor.Direction.FORWARD);
+        FLMotor.setDirection(DcMotor.Direction.REVERSE);
+        FRMotor.setDirection(DcMotor.Direction.FORWARD);
+        BLMotor.setDirection(DcMotor.Direction.REVERSE);
+        BRMotor.setDirection(DcMotor.Direction.FORWARD);
+
+
+        /*
+         * NOTE: Many comments have been omitted from this sample for the
+         * sake of conciseness. If you're just starting out with EasyOpenCv,
+         * you should take a look at {@link InternalCamera1Example} or its
+         * webcam counterpart, {@link WebcamExample} first.
+
+
+         */
+
+
+
+        telemetry.addData("Status", "sInitialized");
+        telemetry.update();
+
+
+
+/*
+
+ Initialize the hardware variables. Note that the strings used here as parameters
+        to 'get' must correspond to the names assigned during the robot configuration
+        step (using the FTC Robot Controller app on the phone).
+*/
+
+
+
+/*
+
+                To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+        Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
+            Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+
+
+
+
+
+
+
+ Wait for the game to start (driver presses PLAY)
+
+*/
+
+
+
+
+
+/*        We set the viewport policy to optimized view so the preview doesn't appear 90 deg
+        out when the RC activity is in portrait. We do our actual image processing assuming
+        landscape orientation, though.*/
+
+
+
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(-33.8, -67, Math.PI / 2));
+
+        //Initalized position
+
+
+
+        topLServo.setPosition(topLPositions[4]);
+        topRServo.setPosition(topRPositions[4]);
+        rRServo.setPosition(rRPositions[3]);
+        lLServo.setPosition(lLPositions[3]);
+        topWristServo.setPosition(topWristPositions[3]);
+        topPinchServo.setPosition(topPinchPositions[1]);
+
+        waitForStart();
+        while (opModeIsActive())
+        {
+
+
+            doActions(drive);
+
+
+            //Don't burn CPU cycles busy-looping in this sample
+            sleep(15000);
+            break;
+        }
+
+
+    }
+
+
+    public class SlidesUp implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            timer.schedule(new topPinchPosition(1), 0);
+            timer.schedule(new vExPosition(1, 1), 0);
+            timer.schedule(new vExPosition2(1, 1), 0);
+
+            return false;
+        }
+    }
+
+    public class SlidesDown implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            timer.schedule(new vExPosition(0, 1), 0);
+            timer.schedule(new vExPosition2(0, 1), 0);
+
+            return false;
+        }
+    }
+    public class PlacingArm implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            timer.schedule(new topLPosition(1), 0);
+            timer.schedule(new topRPosition(1), 0);
+            timer.schedule(new topWristPosition(1), 0);
+            timer.schedule(new topWristPosition(1), 0);
+            timer.schedule(new topPinchPosition(1), 0);
+
+            return false;
+        }
+    }
+
+
+
+    public class ClawClose implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            topPinchServo.setPosition(topPinchPositions[1]);
+            return false;
+        }
+    }
+
+
+    public class IntakeStart implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            rRServo.setPosition(rRPositions[1]);
+            lLServo.setPosition(lLPositions[1]);
+            timer.schedule(new vExPosition(0, 1), 0);
+            timer.schedule(new vExPosition2(0, 1), 0);
+            IMotor.setPower(.8);
+            return false;
+        }
+    }
+
+    public class HorSlidesOut implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+            timer.schedule(new hExPosition(1, 1), 0);
+            return false;
+        }
+    }
+
+    public class IntakeEnd implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+            IMotor.setPower(0);
+            return false;
+        }
+    }
+
+    public class HorReset implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+            timer.schedule(new hExPosition(3, 1), 0);
+            return false;
+        }
+    }
+
+    public class Normal implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+            topLServo.setPosition(topLPositions[6]);
+            topRServo.setPosition(topRPositions[6]);
+            rRServo.setPosition(rRPositions[3]);
+            lLServo.setPosition(lLPositions[3]);
+            topWristServo.setPosition(topWristPositions[0]);
+            topPinchServo.setPosition(topPinchPositions[1]);            return false;
+        }
+    }
+
+
+    public class Transfer implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+            timer.schedule(new rRPosition(0), 0);
+            timer.schedule(new lLPosition(0), 0);
+            timer.schedule(new hExPosition(2, 1), 0);
+            timer.schedule(new topLPosition(0), 0);
+            timer.schedule(new topRPosition(0), 0);
+            timer.schedule(new topPinchPosition(2), 0 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(2), 0 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(3), 11 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(3), 11 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topPinchPosition(1), 13 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(0), 21 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(0), 21 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topWristPosition(0), 30 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new rRPosition(2), 25 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new lLPosition(2), 25 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topLPosition(0), 25 * DELAY_BETWEEN_MOVES);
+            timer.schedule(new topRPosition(0), 25 * DELAY_BETWEEN_MOVES);
+            return false;
+        }
+    }
+
+
+    public class ClawOpen implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            topPinchServo.setPosition(topPinchPositions[0]);
+            return false;
+        }
+    }
+
+
+    public class Neutralpos implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            timer.schedule(new vExPosition(0, 1), 0);
+            timer.schedule(new vExPosition2(0, 1), 0);
+            timer.schedule(new topLPosition(0), 0);
+            timer.schedule(new topRPosition(0), 0);
+            timer.schedule(new topWristPosition(0), 0);
+            timer.schedule(new vExPower(0), 12 * DELAY_BETWEEN_MOVES);
+            return false;
+        }
+    }
+    public class IntakeNeutral implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            timer.schedule(new rRPosition(4), 0);
+            timer.schedule(new lLPosition(4), 0);
+
+            return false;
+        }
+    }
+
+
+
+    private void doActions(MecanumDrive drive) {
+//        timer.schedule(new LowerArmToCertainServoPosition(4),  2 * DELAY_BETWEEN_MOVES);
+//        timer.schedule(new MoveWristServoPosition(0), 0 * DELAY_BETWEEN_MOVES);
+
+
+
+
+        TrajectoryActionBuilder actionBuilder = drive.actionBuilder(drive.pose);
+        Actions.runBlocking(new ParallelAction(actionBuilder.build(), actionBuilder.build())); //figured it out :)
+        actionBuilder = drive.actionBuilder(drive.pose);
+
+
+        //Driving to position and Placing pre-set Sample into high basket
+        Actions.runBlocking(actionBuilder.afterTime(0, new Normal()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.75).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new SlidesUp()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.3).build());
+
+        //moves to basket
+        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-59.5, -59.5), (Math.PI/4)).build(), actionBuilder.build()));
+        actionBuilder = drive.actionBuilder(drive.pose);
+        Actions.runBlocking(actionBuilder.afterTime(0, new PlacingArm()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.2).build());
+        Actions.runBlocking(actionBuilder.afterTime(0.6, new ClawOpen()).build());
+
+        //Leaving Basket area and picking up second sample
+        Actions.runBlocking(actionBuilder.afterTime(0, new HorSlidesOut()).build());
+        Actions.runBlocking(actionBuilder.afterTime(1, new IntakeStart()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+
+        //moves to sample 2
+        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-46.25, -51.75), (Math.PI/1.8)).build(), actionBuilder.build()));
+        Actions.runBlocking(actionBuilder.waitSeconds(1.25).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new IntakeEnd()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.35).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new Transfer()).build());
+
+        //Moving to Basket and Placing
+        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-59.75, -59.25), (Math.PI/4)).build(), actionBuilder.build()));
+        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new SlidesUp()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new PlacingArm()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.2).build());
+        Actions.runBlocking(actionBuilder.afterTime(0.6, new ClawOpen()).build());
+
+
+        //Leaving Basket area and picking up second sample
+        Actions.runBlocking(actionBuilder.afterTime(0, new HorSlidesOut()).build());
+        Actions.runBlocking(actionBuilder.afterTime(1, new IntakeStart()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+
+        //moves to sample 2
+        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-55.75, -51.75), (Math.PI/1.8)).build(), actionBuilder.build()));
+        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new IntakeEnd()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new Transfer()).build());
+
+        //Moving to Basket and Placing
+        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-59.5, -59.25), (Math.PI/4)).build(), actionBuilder.build()));
+        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new SlidesUp()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new PlacingArm()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.2).build());
+        Actions.runBlocking(actionBuilder.afterTime(0.6, new ClawOpen()).build());
+
+        //Leaving Basket area and picking up Third sample
+        Actions.runBlocking(actionBuilder.afterTime(0, new HorSlidesOut()).build());
+        Actions.runBlocking(actionBuilder.afterTime(1, new IntakeStart()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+
+
+        //moves to sample 3
+        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-59.75, -50.5), (Math.PI/1.5)).build(), actionBuilder.build()));
+        Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new IntakeEnd()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new HorReset()).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new Neutralpos()).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new IntakeNeutral()).build());
+        //  Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-59, -53), (Math.PI/2)).build(), actionBuilder.build()));
+       // Actions.runBlocking(actionBuilder.waitSeconds(1.2).build());
+
+        // Actions.runBlocking(actionBuilder.turnTo((Math.PI/2)).build());
+        // Actions.runBlocking(actionBuilder.waitSeconds(0.25).build());
+        //Actions.runBlocking(actionBuilder.strafeToConstantHeading(new Vector2d(-48,-53)).build());
+      //  Actions.runBlocking(actionBuilder.waitSeconds(1).build());
+
+
+        //take first sample to highbasket and place
+        /*Actions.runBlocking(actionBuilder.afterTime(0, new IntakeEnd()).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new Transfer()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(2).build());
+        Actions.runBlocking(actionBuilder.afterTime(0, new SlidesUp()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.5).build());
+        Actions.runBlocking(new ParallelAction(actionBuilder.strafeToLinearHeading(new Vector2d(-59, -61.25), (Math.PI/4), new AngularVelConstraint(2*Math.PI)).build()));
+        Actions.runBlocking(actionBuilder.afterTime(0.4, new PlacingArm()).build());
+        Actions.runBlocking(actionBuilder.waitSeconds(0.2).build());
+        Actions.runBlocking(actionBuilder.afterTime(0.6, new ClawOpen()).build());*/
+
+
+
+
+    }
+
+
+    private DriveDirection getCorrectDirection(DriveDirection direction, boolean needInvert) {
+        if (!needInvert)
+            return direction;
+
+
+        DriveDirection invertedDirection = direction;
+        switch (direction) {
+            case LEFT:
+                invertedDirection = DriveDirection.RIGHT;
+                break;
+            case RIGHT:
+                invertedDirection = DriveDirection.LEFT;
+                break;
+            case FORWARD:
+                invertedDirection = DriveDirection.BACKWARD;
+                break;
+            case BACKWARD:
+                invertedDirection = DriveDirection.FORWARD;
+                break;
+            default:
+                break;
+        }
+
+
+        double vExPosition = vExMotor.getCurrentPosition();
+        double vExPosition2 = vExMotor.getCurrentPosition();
+        double hExPosition = hExMotor.getCurrentPosition();
+        // double LAPosition = LAMotor.getCurrentPosition();
+        // double RAPosition = RAMotor.getCurrentPosition();
+
+
+        double vExDesiredPosition = vExMotor.getTargetPosition();
+        double vExDesiredPosition2 = vExMotor.getTargetPosition();
+        double hExDesiredPosition = hExMotor.getTargetPosition();
+        // double LADesiredPosition = LAMotor.getTargetPosition();
+        //double RADesiredPosition = RAMotor.getTargetPosition();
+
+        telemetry.addData("vEx Encoder Position Left", vExPosition);
+        telemetry.addData("vEx Encoder Position Right", vExPosition2);
+        telemetry.addData("hEx Encoder Position", hExPosition);
+        //telemetry.addData("LA Encoder Position", LAPosition);
+        //telemetry.addData("RA Encoder Position", RAPosition);
+        telemetry.addData("vEx Encoder Targeted Position Left", vExDesiredPosition);
+        telemetry.addData("vEx Encoder Targeted Position Right", vExDesiredPosition);
+        telemetry.addData("hEx Encoder CurrentPosition", hExDesiredPosition);
+        // telemetry.addData("LA Encoder Targeted Position", LADesiredPosition);
+        // telemetry.addData("RA Encoder Targeted Position", RADesiredPosition);
+        telemetry.update();
+
+
+        return invertedDirection;
+    }
+}
+
