@@ -39,11 +39,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.constants.TeleOpServoConstantsSigmaAddition;
-
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import java.lang.Math;
 
 import java.util.TimerTask;
 import java.util.Timer;
+
 /*
  * This file contains an example of an iterative (Non-Linear) "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -73,7 +74,6 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     //private CRServo IServo = null;
     private DcMotor IMotor = null;
     private Servo topPinchServo = null;
-    private Servo bottomPinchServo = null;
     private Servo rRServo = null;
     private Servo rLServo = null;
     private Servo lRServo = null;
@@ -414,12 +414,14 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
      */
     @Override
     public void init_loop() {
-        topLServo.setPosition(topLPositions[6]);
-        topRServo.setPosition(topRPositions[6]);
+
+       // initalized position
+        topLServo.setPosition(topLPositions[4]);
+        topRServo.setPosition(topRPositions[4]);
         rRServo.setPosition(rRPositions[3]);
         lLServo.setPosition(lLPositions[3]);
-        topWristServo.setPosition(topWristPositions[0]);
-        topPinchServo.setPosition(topPinchPositions[0]);
+        topWristServo.setPosition(topWristPositions[3]);
+        topPinchServo.setPosition(topPinchPositions[1]);
 
     }
 
@@ -526,7 +528,7 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
                 hExMotor.setPower(0);
             }
         }
-if (bButtonPressed) {                     // intake system process
+if (bButtonPressed) {                     // transfer system process
     wasBPressed = true;
 }
     if (hExMotor.getCurrentPosition() != 5 && wasBPressed) {
@@ -534,24 +536,22 @@ if (bButtonPressed) {                     // intake system process
         timer.schedule(new setIsIntakeMoving(true), 0);
         telemetry.addData("bButtonPressed", isBPressed);
         telemetry.update();
-        timer.schedule(new rRPosition(0), 0);
-        timer.schedule(new lLPosition(0), 0);
-        timer.schedule(new hExPosition(0, 1), 0);
+        timer.schedule(new rRPosition(2), 0);
+        timer.schedule(new lLPosition(2), 0);
+        timer.schedule(new hExPosition(3, 1), 0);
         timer.schedule(new topLPosition(0), 0);
         timer.schedule(new topRPosition(0), 0);
-        timer.schedule(new topPinchPosition(2), 0 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topWristPosition(2), 0 * DELAY_BETWEEN_MOVES);
+        timer.schedule(new topPinchPosition(2), 0);
+        timer.schedule(new topWristPosition(2), 0);
         timer.schedule(new setManualMode(true), 10 * DELAY_BETWEEN_MOVES);
         timer.schedule(new topLPosition(3), 11 * DELAY_BETWEEN_MOVES);
         timer.schedule(new topRPosition(3), 11 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topPinchPosition(1), 13 * DELAY_BETWEEN_MOVES);
+        timer.schedule(new topPinchPosition(1), 16 * DELAY_BETWEEN_MOVES);
         timer.schedule(new topLPosition(0), 21 * DELAY_BETWEEN_MOVES);
         timer.schedule(new topRPosition(0), 21 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topWristPosition(0), 30 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new rRPosition(2), 25 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new lLPosition(2), 25 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topLPosition(0), 25 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topRPosition(0), 25 * DELAY_BETWEEN_MOVES);
+        timer.schedule(new rRPosition(0), 22 * DELAY_BETWEEN_MOVES);
+        timer.schedule(new lLPosition(0), 22 * DELAY_BETWEEN_MOVES);
+        timer.schedule(new topWristPosition(0), 26 * DELAY_BETWEEN_MOVES);
     }
 // intake
         //More Buttons
@@ -618,7 +618,7 @@ if (bButtonPressed) {                     // intake system process
             timer.schedule(new vExPower(0), 12 * DELAY_BETWEEN_MOVES);
         }
 
-        if (xButtonPressed && !oldxButtonPressed && !isArmMoving) {
+        if (xButtonPressed && !oldxButtonPressed && !isArmMoving) {// go down silly
             timer.schedule(new setIsArmMoving(true), 0);
             timer.schedule(new rRPosition(1), 0);
             timer.schedule(new lLPosition(1), 0);
@@ -653,6 +653,17 @@ if (bButtonPressed) {                     // intake system process
 
 
         }
+
+// this will kill the robot
+        /*if (aButtonPressed && !oldaButtonPressed && bButtonPressed && !oldbButtonPressed && xButtonPressed && !oldxButtonPressed && yButtonPressed && !oldyButtonPressed && !isArmMoving) { //neutral position index = 0
+            timer.schedule(new vExPosition(0, 1), 0);
+            timer.schedule(new vExPosition2(1, 1), 0);
+            timer.schedule(new hExPosition(5, 5), 0);
+            timer.schedule(new rRPosition(5), 0);
+            timer.schedule(new lLPosition(5), 0);
+
+        }
+*/
 
 
 
