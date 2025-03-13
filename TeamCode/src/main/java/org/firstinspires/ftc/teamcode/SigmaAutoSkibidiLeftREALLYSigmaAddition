@@ -1,0 +1,673 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.pedropathing.follower.Follower;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.Path;
+import com.pedropathing.pathgen.PathChain;
+import com.pedropathing.pathgen.Point;
+import com.pedropathing.util.Constants;
+import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+
+
+import org.firstinspires.ftc.teamcode.constants.TeleOpServoConstantsSigmaAddition;
+import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
+import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
+
+import java.util.TimerTask;
+
+@Autonomous(name = "Left")
+public class SigmaAutoSkibidiLeftREALLYSigmaAddition extends OpMode
+{
+    private Follower follwer;
+    private Timer pathTimer, actionTimer, opmodeTimer;
+
+    /** This is the variable where we store the state of our auto.
+     * It is used by the pathUpdate method. */
+    private int pathState;
+
+    private DcMotor vExMotor = null;
+    private DcMotor vExMotor2 = null;
+    private DcMotor hExMotor = null;
+    private DcMotor FLMotor = null;
+    private DcMotor FRMotor = null;
+    private DcMotor BLMotor = null;
+    private DcMotor BRMotor = null;
+    private DcMotor IMotor = null;
+    private Servo topPinchServo = null;
+    private Servo bottomPinchServo = null;
+    private Servo rRServo = null;
+    private Servo rLServo = null;
+    private Servo lRServo = null;
+    private Servo lLServo = null;
+    private Servo topLServo = null;
+    private Servo topRServo = null;
+    private Servo topWristServo = null;
+
+
+    private double[] topPinchPositions = TeleOpServoConstantsSigmaAddition.topPinchPositions;
+    private double[] rRPositions = TeleOpServoConstantsSigmaAddition.rRPositions;
+    private double[] lLPositions = TeleOpServoConstantsSigmaAddition.lLPositions;
+    private double[] topLPositions = TeleOpServoConstantsSigmaAddition.topLPositions;
+    private double[] topRPositions = TeleOpServoConstantsSigmaAddition.topRPositions;
+    private double[] topWristPositions = TeleOpServoConstantsSigmaAddition.topWristPositions;
+    private int[] vExPositions = TeleOpServoConstantsSigmaAddition.vExPositions;
+    private int[] vExPositions2 = TeleOpServoConstantsSigmaAddition.vExPositions2;
+    private int[] hExPositions = TeleOpServoConstantsSigmaAddition.hExPositions;
+
+    java.util.Timer timer = new java.util.Timer();
+
+    private int DELAY_BETWEEN_MOVES = 17;
+
+
+    enum DriveDirection {
+        FORWARD,
+        LEFT,
+        RIGHT,
+        BACKWARD
+    }
+
+
+    enum StartingPositionEnum {
+        LEFT,
+        RIGHT
+    }
+
+
+    enum SlidePackDirection {
+        UP,
+        DOWN
+    }
+
+
+
+    private int index = 0;
+    private int wristIndex;
+
+    class vExPosition extends TimerTask {
+        int i;
+        double power;
+
+        public vExPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            vExMotor.setTargetPosition(vExPositions[i]);
+            vExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            vExMotor.setPower(power);
+        }
+    }
+
+
+
+    class vExPosition2 extends TimerTask {
+        int i;
+        double power;
+
+        public vExPosition2(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            vExMotor2.setTargetPosition(vExPositions2[i]);
+            vExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            vExMotor2.setPower(power);
+        }
+    }
+    class vExPower extends TimerTask {
+        double power;
+
+        public vExPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            vExMotor.setPower(power);
+            vExMotor2.setPower(power);
+        }
+    }
+    class hExPower extends TimerTask {
+        double power;
+
+        public hExPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            hExMotor.setPower(power);
+        }
+    }
+    class FRPower extends TimerTask {
+        double power;
+
+        public FRPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            FRMotor.setPower(power);
+        }
+    }
+    class FLPower extends TimerTask {
+        double power;
+
+        public FLPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            FLMotor.setPower(power);
+        }
+    }
+    class BRPower extends TimerTask {
+        double power;
+
+        public BRPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            BRMotor.setPower(power);
+        }
+    }
+
+    class BLPower extends TimerTask {
+        double power;
+
+        public BLPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            FLMotor.setPower(power);
+        }
+    }
+
+
+    class hExPosition extends TimerTask {
+        int i;
+        double power;
+
+        public hExPosition(int i, double power) {
+            this.i = i;
+            this.power = power;
+
+        }
+
+        public void run() {
+            hExMotor.setTargetPosition(hExPositions[i]);
+            hExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            hExMotor.setPower(power);
+        }
+    }
+
+    class rRPosition extends TimerTask {
+        int i;
+
+        public rRPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            rRServo.setPosition(rRPositions[i]);
+        }
+    }
+
+
+
+    class lLPosition extends TimerTask {
+        int i;
+
+        public lLPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            lLServo.setPosition(lLPositions[i]);
+        }
+    }
+
+
+    class topLPosition extends TimerTask {
+        int i;
+
+        public topLPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topLServo.setPosition(topLPositions[i]);
+        }
+    }
+
+    class topRPosition extends TimerTask {
+        int i;
+
+        public topRPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topRServo.setPosition(topRPositions[i]);
+        }
+    }
+
+    class topWristPosition extends TimerTask {
+        int i;
+
+        public topWristPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topWristServo.setPosition(topWristPositions[i]);
+        }
+    }
+
+    class topPinchPosition extends TimerTask {
+        int i;
+
+        public topPinchPosition(int i) {
+            this.i = i;
+        }
+
+        public void run() {
+            topPinchServo.setPosition(topPinchPositions[i]);
+        }
+    }
+//BAD BELOW ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private final Pose startPose = new Pose(7.5, 104, Math.toRadians(0));  // Starting position
+    private final Pose scorePose = new Pose(13, 130, Math.toRadians(315)); // Scoring position 1
+    /*private final Pose scorePose2 = new Pose(13, 130, Math.toRadians(315)); // Scoring position 2
+    private final Pose scorePose3 = new Pose(13, 130, Math.toRadians(315)); // Scoring position 3
+    private final Pose scorePose4 = new Pose(13, 130, Math.toRadians(315)); // Scoring position 4
+    */
+
+    private final Pose pickup1 = new Pose(34, 120.25, Math.toRadians(0)); // First sample pickup
+    private final Pose pickup2 = new Pose(35, 131.7, Math.toRadians(0));
+    private final Pose pickup3 = new Pose(24, 133.5, Math.toRadians(20));
+
+    private final Pose inter1 = new Pose(25, 120.25, Math.toRadians(0)); //first intermediate point
+
+    private final Pose parkPose = new Pose(60, 95, Math.toRadians(45));    // Parking position
+    private final Pose parkControlPose = new Pose(60, 130, Math.toRadians(45)); // Control point for curved path
+
+    private Path park;
+    private PathChain scorePreload, goToInter1, pickingUpSample1, scoringSample1, pickingUpSample2, scoringSample2, pickingUpSample3, scoringSample3, parkSilly;
+    private PathChain doEverything;
+    public void buildPaths() {
+
+        /* This is our scorePreload path. We are using a BezierLine, which is a straight line.
+        THIS IS FROM START POS TO BASKET */
+
+        scorePreload = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(startPose), new Point(scorePose)))
+                .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
+                .build();
+        // goes to first intermediate point, aids intake of first block
+
+        goToInter1 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(scorePose), new Point(inter1)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), inter1.getHeading())
+                .build();
+        /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line.
+        THIS IS FROM BASKET TO PICKUP ONE*/
+        pickingUpSample1 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(inter1), new Point(pickup1)))
+                .setLinearHeadingInterpolation(inter1.getHeading(), pickup1.getHeading())
+                .build();
+
+        /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        scoringSample1 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(pickup1), new Point(inter1)))
+                .setLinearHeadingInterpolation(pickup1.getHeading(), inter1.getHeading())
+                .build();
+
+        scoringSample1 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(inter1), new Point(scorePose)))
+                .setLinearHeadingInterpolation(inter1.getHeading(), scorePose.getHeading())
+                .build();
+
+        /* This is our grabPickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        pickingUpSample2 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(scorePose), new Point(pickup2)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2.getHeading())
+                .build();
+
+        /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        /*scoringSample2 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(pickup2), new Point(scorePose3)))
+                .setLinearHeadingInterpolation(pickup2.getHeading(), scorePose3.getHeading())
+                .build();*/
+
+        /*pickingUpSample3 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(scorePose3), new Point(pickup3)))
+                .setLinearHeadingInterpolation(scorePose3.getHeading(), pickup3.getHeading())
+                .build();*/
+
+       /* scoringSample3 = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(pickup3), new Point(scorePose4)))
+                .setLinearHeadingInterpolation(pickup3.getHeading(), scorePose4.getHeading())
+                .build();*/
+        
+
+        /* This is our park path. We are using a BezierCurve with 3 points, which is a curved line that is curved based off of the control point */
+        /*parkSilly = follwer.pathBuilder()
+                .addPath(new BezierCurve(new Point(scorePose4), new Point(parkPose),*//*Contral Point*//* new Point(parkControlPose)))
+                .setLinearHeadingInterpolation(scorePose3.getHeading(), parkControlPose.getHeading())
+                .build();*/
+    }
+    public void autonomousPathUpdate() {
+        switch (pathState) {
+            case 0:
+                if (!follwer.isBusy()) {
+                    timer.schedule(new topLPosition(0), 0);
+                    timer.schedule(new topRPosition(0), 0);
+                    timer.schedule(new vExPosition(1, 1), 200);
+                    timer.schedule(new vExPosition2(1, 1), 200);
+                    timer.schedule(new topLPosition(1), 1000);
+                    timer.schedule(new topRPosition(1), 1000);
+                    timer.schedule(new topWristPosition(1), 1000);
+                    timer.schedule(new topPinchPosition(0), 1500);
+                    follwer.followPath(scorePreload);
+                    setPathState(1);
+                    break;
+                }
+            case 1:
+                if(!follwer.isBusy()){
+                    //Getting the vertical slide stuff ready for transfer
+                    timer.schedule(new topLPosition(0), 0);
+                    timer.schedule(new topRPosition(0), 0);
+                    timer.schedule(new vExPosition(0, 1), 250);
+                    timer.schedule(new vExPosition2(0, 1), 250);
+                    timer.schedule(new rRPosition(1), 0);
+                    timer.schedule(new lLPosition(1), 0);
+                    timer.schedule(new topWristPosition(0), 0);
+                    timer.schedule(new vExPower(0), 12 * DELAY_BETWEEN_MOVES);
+
+                    follwer.followPath(goToInter1);
+                    setPathState(2);
+                }
+            case 2:
+                if (!follwer.isBusy()) {
+                    //Horizontal slide intake stuff
+                    IMotor.setPower(-0.75);
+                    timer.schedule(new rRPosition(2), 1500);
+                    IMotor.setPower(-0.75);
+                    timer.schedule(new lLPosition(2), 1500);
+                    IMotor.setPower(-0.75);
+
+
+
+                    follwer.followPath(pickingUpSample1);
+                    setPathState(3);
+                }
+                break;
+
+            case 3:
+                if(!follwer.isBusy()) {
+
+                    //transfer
+                    IMotor.setPower(0);
+                    FLMotor.setPower(0.5);
+                    BLMotor.setPower(0.5);
+                    FRMotor.setPower(0.5);
+                    BRMotor.setPower(0.5);
+
+                    timer.schedule(new rRPosition(2), 50);
+                    timer.schedule(new lLPosition(2), 50);
+                    timer.schedule(new topLPosition(0), 50);
+                    timer.schedule(new topRPosition(0), 50);
+                    timer.schedule(new topPinchPosition(2), 50);
+                    timer.schedule(new topWristPosition(2), 50);
+                    timer.schedule(new topLPosition(3), 61 * DELAY_BETWEEN_MOVES);
+                    timer.schedule(new topRPosition(3), 61 * DELAY_BETWEEN_MOVES);
+                    timer.schedule(new topPinchPosition(1), 66 * DELAY_BETWEEN_MOVES);
+                    timer.schedule(new topLPosition(0), 71 * DELAY_BETWEEN_MOVES);
+                    timer.schedule(new topRPosition(0), 71 * DELAY_BETWEEN_MOVES);
+                    timer.schedule(new rRPosition(0), 72 * DELAY_BETWEEN_MOVES);
+                    timer.schedule(new lLPosition(0), 72 * DELAY_BETWEEN_MOVES);
+                    timer.schedule(new topWristPosition(0), 76 * DELAY_BETWEEN_MOVES);
+
+                    //sending up and placing
+                    timer.schedule(new vExPosition(1, 1), 1842);
+                    timer.schedule(new vExPosition2(1, 1), 1842);
+                    timer.schedule(new topLPosition(1), 1942+500);
+                    timer.schedule(new topRPosition(1), 1942);
+                    timer.schedule(new topWristPosition(1), 1972);
+                    timer.schedule(new topPinchPosition(0), 2472);
+
+
+
+                    follwer.followPath(scoringSample1);
+                    setPathState(4);
+                }
+                break;
+
+
+            /*case 4:
+                if(!follwer.isBusy()) {
+                    timer.schedule(new vExPosition(1, 1), 0);
+                    timer.schedule(new vExPosition2(1, 1), 0);
+                    timer.schedule(new topLPosition(1), 0);
+                    timer.schedule(new topRPosition(1), 0);
+                    timer.schedule(new topWristPosition(1), 0);
+                    follwer.followPath(pickingUpSample2);
+                    setPathState(5);
+                }
+                break;
+
+            case 5:
+                if(!follwer.isBusy()) {
+                    timer.schedule(new vExPosition(1, 1), 0);
+                    timer.schedule(new vExPosition2(1, 1), 0);
+                    timer.schedule(new topLPosition(1), 0);
+                    timer.schedule(new topRPosition(1), 0);
+                    timer.schedule(new topWristPosition(1), 0);
+                    follwer.followPath(scoringSample2);
+                    setPathState(6);
+                }
+                break;
+
+            case 6:
+                if(!follwer.isBusy()) {
+                    timer.schedule(new vExPosition(1, 1), 0);
+                    timer.schedule(new vExPosition2(1, 1), 0);
+                    timer.schedule(new topLPosition(1), 0);
+                    timer.schedule(new topRPosition(1), 0);
+                    timer.schedule(new topWristPosition(1), 0);
+                    follwer.followPath(pickingUpSample3);
+                    setPathState(7);
+                }
+                break;
+
+            case 7:
+            if(!follwer.isBusy()) {
+                timer.schedule(new vExPosition(1, 1), 0);
+                timer.schedule(new vExPosition2(1, 1), 0);
+                timer.schedule(new topLPosition(1), 0);
+                timer.schedule(new topRPosition(1), 0);
+                timer.schedule(new topWristPosition(1), 0);
+                follwer.followPath(scoringSample3);
+                setPathState(8);
+                break;
+                }
+
+            case 8:
+            if(!follwer.isBusy()) {
+                timer.schedule(new vExPosition(0, 1), 0);
+                timer.schedule(new vExPosition2(0, 1), 0);
+                timer.schedule(new topLPosition(0), 0);
+                timer.schedule(new topRPosition(0), 0);
+                timer.schedule(new rRPosition(3), 0);
+                timer.schedule(new lLPosition(3), 0);
+                timer.schedule(new topWristPosition(0), 0);
+                timer.schedule(new vExPower(0), 12 * DELAY_BETWEEN_MOVES);
+                timer.schedule(new hExPosition(3, 1), 0);
+                timer.schedule(new hExPower(0), 12 * DELAY_BETWEEN_MOVES);
+                follwer.followPath(parkSilly);
+                setPathState(9);
+                break;
+
+                }
+
+                */
+
+
+
+
+
+        }
+    }
+
+    /** These change the states of the paths and actions
+     * It will also reset the timers of the individual switches **/
+    public void setPathState(int pState) {
+        pathState = pState;
+        pathTimer.resetTimer();
+    }
+
+    /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
+
+    public void loop() {
+
+        // These loop the movements of the robot
+        follwer.update();
+        autonomousPathUpdate();
+
+        // Feedback to Driver Hub
+        telemetry.addData("path state", pathState);
+        telemetry.addData("x", follwer.getPose().getX());
+        telemetry.addData("y", follwer.getPose().getY());
+        telemetry.addData("heading", follwer.getPose().getHeading());
+        telemetry.update();
+    }
+
+    /** This method is called once at the init of the OpMode. **/
+    public void init() {
+
+
+        vExMotor = hardwareMap.get(DcMotor.class, "vEx");
+        vExMotor2 = hardwareMap.get(DcMotor.class, "vEx2");
+        hExMotor = hardwareMap.get(DcMotor.class, "hEx");
+        IMotor = hardwareMap.get(DcMotor.class, "IM");
+        FLMotor = hardwareMap.get(DcMotor.class, "FL");
+        FRMotor = hardwareMap.get(DcMotor.class, "FR");
+        BLMotor = hardwareMap.get(DcMotor.class, "BL");
+        BRMotor = hardwareMap.get(DcMotor.class, "BR");
+        topPinchServo = hardwareMap.get(Servo.class, "Top Pinch");
+        rRServo = hardwareMap.get(Servo.class, "RR");
+        rLServo = hardwareMap.get(Servo.class, "RL");
+        lRServo = hardwareMap.get(Servo.class, "LR");
+        lLServo = hardwareMap.get(Servo.class, "LL");
+        topLServo = hardwareMap.get(Servo.class, "TL");
+        topRServo = hardwareMap.get(Servo.class, "TR");
+        topWristServo = hardwareMap.get(Servo.class, "TW");
+
+        vExMotor.setTargetPosition(vExPositions[0]);
+        vExMotor2.setTargetPosition(vExPositions2[0]);
+        hExMotor.setTargetPosition(hExPositions[0]);
+
+
+        //LAMotor.setTargetPosition(LAPositions[0]);
+        //RAMotor.setTargetPosition(RAPositions[0]);
+
+
+        vExMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        vExMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        hExMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hExMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+       /* IMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        IMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+*/
+
+
+        //LAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // LAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // RAMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // RAMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+        FLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
+        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+        IMotor.setDirection(DcMotor.Direction.FORWARD);
+        vExMotor.setDirection(DcMotor.Direction.FORWARD);
+        vExMotor2.setDirection(DcMotor.Direction.FORWARD);
+        hExMotor.setDirection(DcMotor.Direction.FORWARD);
+        FLMotor.setDirection(DcMotor.Direction.REVERSE);
+        FRMotor.setDirection(DcMotor.Direction.FORWARD);
+        BLMotor.setDirection(DcMotor.Direction.REVERSE);
+        BRMotor.setDirection(DcMotor.Direction.FORWARD);
+        //RAMotor.setDirection(DcMotor.Direction.FORWARD);
+        //LAMotor.setDirection(DcMotor.Direction.FORWARD);
+
+
+
+
+
+
+
+        topLServo.setPosition(topLPositions[4]);
+        topRServo.setPosition(topRPositions[4]);
+        rRServo.setPosition(rRPositions[3]);
+        lLServo.setPosition(lLPositions[3]);
+        topWristServo.setPosition(topWristPositions[3]);
+        topPinchServo.setPosition(topPinchPositions[1]);
+
+
+
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
+
+        Constants.setConstants(FConstants.class, LConstants.class);
+        follwer = new Follower(hardwareMap);
+        follwer.setStartingPose(startPose);
+        buildPaths();
+    }
+
+    /** This method is called continuously after Init while waiting for "play". **/
+    public void init_loop() {}
+
+    /** This method is called once at the start of the OpMode.
+     * It runs all the setup actions, including building paths and starting the path system **/
+
+    public void start() {
+        opmodeTimer.resetTimer();
+        setPathState(0);
+    }
+
+    /** We do not use this because everything should automatically disable **/
+
+    public void stop() {
+    }
+}
