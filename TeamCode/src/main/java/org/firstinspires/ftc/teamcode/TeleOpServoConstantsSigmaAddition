@@ -1,23 +1,23 @@
 package org.firstinspires.ftc.teamcode.constants;
 public class TeleOpServoConstantsSigmaAddition {
 
-    public static final double[] topLPositions = {.3, 0.7, 0.3,0.22, 0.95, 0.45,0.2};
-    // 0.25 - inital position (front horiz)
-    // 0.55 - high basket placement (direct up)
-    // 0.12 - Actual transfer (Front horiz but quite down)
-    // 0.2 - Beginning of transfer (Front horiz but a tad down)
+    public static final double[] topLPositions = {.3, 0.7, 0.3,0.24, 0.95, 0.45,0.2};
+    // 0.3 - inital position (front horiz)
+    // 0.7 - high basket placement (direct up)
+    // 0.3 - Actual transfer (Front horiz but quite down)
+    // 0.22 - Beginning of transfer (Front horiz but a tad down)
     // 0.95 - Back wall grab (Back)
     // 0.45 - High Rung placement (Direct up with a tad forward)
 
-    public static final double[] topRPositions = {.3, 0.7, 0.3,0.22, 0.95, 0.45,0.2};
-    // 0.25 - inital position (front horiz)
-    // 0.55 - high basket placement (direct up)
-    // 0.12 - Actual transfer (Front horiz but quite down)
-    // 0.2 - Beginning of transfer (Front horiz but a tad down)
+    public static final double[] topRPositions = {.3, 0.7, 0.3, 0.24, 0.95, 0.45,0.2};
+    // 0.3 - inital position (front horiz)
+    // 0.7 - high basket placement (direct up)
+    // 0.3 - Actual transfer (Front horiz but quite down)
+    // 0.22 - Beginning of transfer (Front horiz but a tad down)
     // 0.95 - Back wall grab (Back)
     // 0.45 - High Rung placement (Direct up with a tad forward)
 
-    public static final double[] topWristPositions = {0, 0.55, 0.92,1, 0.75, 0.15};
+    public static final double[] topWristPositions = {0, 0.55, 0.95, 1, 0.75, 0.15};
     // 0 - inital position (all back)
     // 0.55 - high basket (direct up with a tad back)
     // 0.92 - Transfer position (Forward)
@@ -25,22 +25,22 @@ public class TeleOpServoConstantsSigmaAddition {
     // 0.75 - Back wall grab (Direct up with a tad forward)
     // 0.15 - High Rung placement (Back)
 
-    public static final double[] topPinchPositions = {0.0, 0.75, 0.38};
+    public static final double[] topPinchPositions = {0.0, 0.75, 0.45};
     // 0.0 - Open
     // 0.75 - Close
-    // 0.4 - Middle
+    // 0.38 - Middle
 
     //----------------------------------------------------------------- MOTORS
 
     public static final int[] vExPositions = {10, 1560};
-    // 0 - initial position (none)
+    // 10 - initial position (none)
     // 1560 - high basket (all the way up)
 
     public static final int[] vExPositions2 = {10, -1560};
-    // 0 - initial position (none)
+    // 10 - initial position (none)
     // -1560 - high basket (all the way up)
 
-    public static final int[] hExPositions = {120, 500, 150,0};
+    public static final int[] hExPositions = {120, 500, 150,5, 1575,1000000000};
     // Transfer pos (all the way back)
 
 
@@ -56,8 +56,18 @@ public class TeleOpServoConstantsSigmaAddition {
 
 
 
-    public static final double[] rRPositions = {0.1,.455,0.15,0.05, .15}; //Down, Middle Up
-    public static final double[] lLPositions= {0.1,.455,0.15,0.05, .15};
+    public static final double[] rRPositions = {0.2,.49 ,0.14,0.05,0.49, 1}; //Down, Middle Up
+    //0.1 - inital position (Up)
+    // 0.4 - intake pos (Horiz)
+
+
+    public static final double[] lLPositions= {0.2,.49 ,0.14,0.05,0.49, 1};
+
+
+
+
+
+
     //public static final double[] wristJinkPositions = {3, 3, -791, -735,-450,-100};
     //public static final int[] LAPositions = {9904,5499};
     //public static final int[] RAPositions = {8996,4589};
