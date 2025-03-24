@@ -82,6 +82,7 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     private Servo topRServo = null;
     private Servo topWristServo = null;
     private Servo wristJinkServo = null;
+    private Servo PAServo = null;
 
 
     private boolean dPadUpPressed;
@@ -105,6 +106,7 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     //private boolean isTargetAndCurrentRAPositionTheSame = false;
 
     private double[] topPinchPositions = TeleOpServoConstantsSigmaAddition.topPinchPositions;
+    private double[] PAPositions = TeleOpServoConstantsSigmaAddition.PAPositions;
     private double[] rRPositions = TeleOpServoConstantsSigmaAddition.rRPositions;
     private double[] lLPositions = TeleOpServoConstantsSigmaAddition.lLPositions;
     //private double[] wristJinkPositions = TeleOpServoConstantsSigmaAddition.wristJinkPositions;
@@ -121,6 +123,8 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     private boolean isBPressed = false;
 
     private boolean oldDPadUpPressed = false;
+    private boolean oldDPadUpPressed1 = false;
+    private boolean oldDPadDownPressed1 = false;
     private boolean oldDPadLeftPressed = false;
     private boolean oldDPadDownPressed = false;
     private boolean oldDPadRightPressed = false;
@@ -135,6 +139,8 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
     private boolean wasBPressed = false;
 
     private final int DELAY_BETWEEN_MOVES = 100;
+    private final int DELAY_BETWEEN_MOVES1 = 75;
+
     Timer timer;
 
 
@@ -188,6 +194,19 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
             vExMotor2.setPower(power);
         }
     }
+
+   /* class PAPower extends TimerTask {
+        double power;
+
+        public PAPower(double power) {
+            this.power = power;
+
+        }
+
+        public void run() {
+            PAServo.setPower(power);
+        }
+    }*/
 
 
     class hExPosition extends TimerTask {
@@ -306,6 +325,14 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
         }
     }
 
+    class PAPosition extends TimerTask {
+        int i;
+
+        public PAPosition(int i) { this.i = i;}
+
+        public void run() {PAServo.setPosition(PAPositions[i]); }
+    }
+
     class topPinchPosition extends TimerTask {
         int i;
 
@@ -317,6 +344,8 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
             topPinchServo.setPosition(topPinchPositions[i]);
         }
     }
+
+
 
 
 
@@ -344,12 +373,14 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
         topPinchServo = hardwareMap.get(Servo.class, "Top Pinch");
 //        bottomPinchServo = hardwareMap.get(Servo.class, "Bottom Pinch");
         rRServo = hardwareMap.get(Servo.class, "RR");
-        rLServo = hardwareMap.get(Servo.class, "RL");
+       // rLServo = hardwareMap.get(Servo.class, "RL");
         lRServo = hardwareMap.get(Servo.class, "LR");
         lLServo = hardwareMap.get(Servo.class, "LL");
         topLServo = hardwareMap.get(Servo.class, "TL");
         topRServo = hardwareMap.get(Servo.class, "TR");
         topWristServo = hardwareMap.get(Servo.class, "TW");
+        PAServo = hardwareMap.get(Servo.class, "PA");
+
 //        wristJinkServo = hardwareMap.get(Servo.class, "Wrist (Jink) Servo");
         timer = new Timer();
 
@@ -422,7 +453,7 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
         lLServo.setPosition(lLPositions[3]);
         topWristServo.setPosition(topWristPositions[3]);
         topPinchServo.setPosition(topPinchPositions[1]);
-
+        PAServo.setPosition(PAPositions[0]);
     }
 
     /*
@@ -447,6 +478,42 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
         final double BLPower = r * Math.sin(robotAngle) + rightX;
         final double BRPower = r * Math.cos(robotAngle) - rightX;
 
+        //Pusher code
+        if (gamepad1.dpad_up && !oldDPadUpPressed1 && !isArmMoving) { //neutral position index = 0
+            timer.schedule(new PAPosition(1), 0);
+        }
+
+        if (gamepad1.dpad_down && !oldDPadDownPressed1 && !isArmMoving) { //neutral position index = 0
+            timer.schedule(new PAPosition(0), 0);
+        }
+
+
+
+
+        /*if(gamepad1.dpad_up){
+            PAServo.setPower(1.0);
+        }else if (gamepad1.dpad_down){
+            PAServo.setPower(-1.0);
+        }else{
+            PAServo.setPower(0.0);
+        }*/
+
+        /*if(gamepad1.dpad_up && !oldDPadUpPressed1) {
+            timer.schedule(new PAPower(1.0), 0);
+            timer.schedule(new PAPower(0.0), 10 * DELAY_BETWEEN_MOVES);
+        }
+            else {
+                timer.schedule(new PAPower(0.0), 0);
+            }
+
+        if(gamepad1.dpad_down && !oldDPadDownPressed1) {
+            timer.schedule(new PAPower(-1.0), 0);
+            timer.schedule(new PAPower(0.0), 10 * DELAY_BETWEEN_MOVES);
+        }
+        else{
+            timer.schedule(new PAPower(0.0), 0);
+
+        */
         // Send calculated power to wheels
         if (gamepad1.right_bumper || gamepad1.left_bumper) {
             if (-gamepad1.right_stick_y > 0) {
@@ -494,6 +561,17 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
         }
 
 
+        //Horiz Extention code
+        /*if(gamepad2.right_stick_y > 0.1) {
+            hExMotor.setPower(1);
+        }
+        else if(gamepad2.right_stick_y > -0.1){
+            hExMotor.setPower(-1);
+        }
+        else{
+            hExMotor.setPower(0);
+        }*/
+
 
 /*if (hExMotor.getCurrentPosition() > 1367 && intakeManualMode == true) {
     intakeManualMode = false;
@@ -513,21 +591,18 @@ public class TestingWithLogieBearSigmaAddition extends OpMode {
 
 
       */  if(intakeManualMode) {
-            if ((gamepad2.right_stick_y > 0.05 || gamepad2.right_stick_y < -0.05) && hExMotor.getCurrentPosition()<1300 && hExMotor.getCurrentPosition() > 5) {
+            if ((gamepad2.right_stick_y > 0.05 || gamepad2.right_stick_y < -0.05) && hExMotor.getCurrentPosition()<1300) {
                 hExMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 hExMotor.setPower(-gamepad2.right_stick_y);
-            }else if ((gamepad2.right_stick_y > 0.05 || gamepad2.right_stick_y < -0.05) && (hExMotor.getCurrentPosition()>1300)) {
+            }else if ((gamepad2.right_stick_y > 0.05 || gamepad2.right_stick_y < -0.05) && (hExMotor.getCurrentPosition()>=1300)) {
                 hExMotor.setPower(-1);
-
-
-
-            }else if ((gamepad2.right_stick_y > 0.05 || gamepad2.right_stick_y < -0.05) && (hExMotor.getCurrentPosition()<5)) {
-                hExMotor.setPower(1);
-
             }else{
                 hExMotor.setPower(0);
             }
         }
+
+
+
 if (bButtonPressed) {                     // transfer system process
     wasBPressed = true;
 }
@@ -543,15 +618,15 @@ if (bButtonPressed) {                     // transfer system process
         timer.schedule(new topRPosition(0), 0);
         timer.schedule(new topPinchPosition(2), 0);
         timer.schedule(new topWristPosition(2), 0);
-        timer.schedule(new setManualMode(true), 10 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topLPosition(3), 11 * DELAY_BETWEEN_MOVES);
+        timer.schedule(new setManualMode(true), 14 * DELAY_BETWEEN_MOVES1);
+        timer.schedule(new topLPosition(3), 15 * DELAY_BETWEEN_MOVES1);
         timer.schedule(new topRPosition(3), 11 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topPinchPosition(1), 16 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topLPosition(0), 21 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topRPosition(0), 21 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new rRPosition(0), 22 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new lLPosition(0), 22 * DELAY_BETWEEN_MOVES);
-        timer.schedule(new topWristPosition(0), 26 * DELAY_BETWEEN_MOVES);
+        timer.schedule(new topPinchPosition(1), 21 * DELAY_BETWEEN_MOVES1);
+        timer.schedule(new topLPosition(0), 25 * DELAY_BETWEEN_MOVES1);
+        timer.schedule(new topRPosition(0), 25 * DELAY_BETWEEN_MOVES1);
+        timer.schedule(new rRPosition(0), 26 * DELAY_BETWEEN_MOVES1);
+        timer.schedule(new lLPosition(0), 26 * DELAY_BETWEEN_MOVES1);
+        timer.schedule(new topWristPosition(0), 30 * DELAY_BETWEEN_MOVES1);
     }
 // intake
         //More Buttons
@@ -609,11 +684,11 @@ if (bButtonPressed) {                     // transfer system process
             timer.schedule(new setIsArmMoving(true), 0);
             timer.schedule(new vExPosition(0, 1), 0);
             timer.schedule(new vExPosition2(0, 1), 0);
-            timer.schedule(new topLPosition(0), 0);
-            timer.schedule(new topRPosition(0), 0);
+            timer.schedule(new topLPosition(5), 0);
+            timer.schedule(new topRPosition(5), 0);
             timer.schedule(new rRPosition(3), 0);
             timer.schedule(new lLPosition(3), 0);
-            timer.schedule(new topWristPosition(0), 0);
+            timer.schedule(new topWristPosition(1), 0);
             timer.schedule(new setIsArmMoving(false), 2 * DELAY_BETWEEN_MOVES);
             timer.schedule(new vExPower(0), 12 * DELAY_BETWEEN_MOVES);
         }
@@ -646,8 +721,8 @@ if (bButtonPressed) {                     // transfer system process
         }
 
         if (dPadUpPressed && !oldDPadUpPressed && !isArmMoving) { // High Rung Placement
-            timer.schedule(new topLPosition(5), 0);
-            timer.schedule(new topRPosition(5), 0);
+            timer.schedule(new topLPosition(7), 0);
+            timer.schedule(new topRPosition(7), 0);
             timer.schedule(new topWristPosition(5), 0);
 
 
@@ -671,6 +746,8 @@ if (bButtonPressed) {                     // transfer system process
 
         //Buttons
         oldDPadDownPressed = dPadDownPressed;
+        oldDPadDownPressed1 = gamepad1.dpad_down;
+        oldDPadUpPressed1 = gamepad1.dpad_up;
         oldDPadUpPressed = dPadUpPressed;
         oldDPadLeftPressed = dPadLeftPressed;
         oldDPadRightPressed = dPadRightPressed;
@@ -705,6 +782,7 @@ if (bButtonPressed) {                     // transfer system process
         telemetry.addData("hEx Encoder CurrentPosition", hExDesiredPosition);
         // telemetry.addData("LA Encoder Targeted Position", LADesiredPosition);
         // telemetry.addData("RA Encoder Targeted Position", RADesiredPosition);
+        telemetry.addData("up", oldDPadUpPressed1);
         telemetry.update();
     }
 
